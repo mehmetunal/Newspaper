@@ -1,0 +1,22 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="AspectCore.Abstractions" />
+    <PackageReference Include="FluentMigrator" />
+    <PackageReference Include="FluentMigrator.Runner" />
+    <PackageReference Include="FluentMigrator.Runner.SqlServer" />
+    <PackageReference Include="Maggsoft.Data" />
+    <PackageReference Include="Maggsoft.Mssql" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Data/Newspaper.Data.Mssql/Newspaper.Data.Mssql.csproj" />
+  </ItemGroup>
+
+</Project>

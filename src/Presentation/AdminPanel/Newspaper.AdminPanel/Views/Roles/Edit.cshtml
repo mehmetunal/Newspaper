@@ -1,0 +1,176 @@
+@model Newspaper.AdminPanel.Models.EditRoleViewModel
+
+@{
+    ViewData["Title"] = "Rol Düzenle";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Rol Düzenle</h1>
+            <p class="text-muted">Rol bilgilerini güncelleyin ve yetkilendirmeleri düzenleyin.</p>
+        </div>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Geri Dön
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Edit Role Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-shield me-2"></i>
+                        Rol Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input type="hidden" asp-for="Id" />
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-tag"></i>
+                                    </span>
+                                    <input asp-for="Name" class="form-control" placeholder="Örn: Editor, Moderator">
+                                </div>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Rol Durumu</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-toggle-on"></i>
+                                    </span>
+                                    <select asp-for="IsActive" class="form-select">
+                                        <option value="true">Aktif</option>
+                                        <option value="false">Pasif</option>
+                                    </select>
+                                </div>
+                                <small class="text-muted">Rolün sistemde aktif olup olmadığını belirler</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-align-left"></i>
+                                </span>
+                                <textarea asp-for="Description" class="form-control" rows="3" 
+                                          placeholder="Bu rolün ne yapabileceğini açıklayın..."></textarea>
+                            </div>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                İptal
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Rol Güncelle
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Role Information -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Rol Bilgileri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">Rol ID</h6>
+                        <small class="text-muted">@Model.Id</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">Oluşturulma Tarihi</h6>
+                        <small class="text-muted">@DateTime.Now.ToString("dd.MM.yyyy HH:mm")</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">Durum</h6>
+                        @if (Model.IsActive)
+                        {
+                            <span class="badge badge-success">
+                                <i class="fas fa-check-circle me-1"></i>
+                                Aktif
+                            </span>
+                        }
+                        else
+                        {
+                            <span class="badge badge-danger">
+                                <i class="fas fa-times-circle me-1"></i>
+                                Pasif
+                            </span>
+                        }
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Permissions Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-shield-alt me-2"></i>
+                        Yetki Bilgileri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">Dashboard</h6>
+                        <small class="text-muted">Ana sayfa erişimi</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">Kullanıcı Yönetimi</h6>
+                        <small class="text-muted">Kullanıcı listesi ve profil yönetimi</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">İçerik Yönetimi</h6>
+                        <small class="text-muted">Makale, kategori ve etiket yönetimi</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-primary">Yorum Yönetimi</h6>
+                        <small class="text-muted">Yorum onaylama ve moderasyon</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Form validation
+        $(document).ready(function() {
+            $('form').on('submit', function() {
+                var isValid = true;
+                
+                // Name validation
+                if ($('#Name').val().trim() === '') {
+                    $('#Name').addClass('is-invalid');
+                    isValid = false;
+                } else {
+                    $('#Name').removeClass('is-invalid');
+                }
+                
+                return isValid;
+            });
+        });
+    </script>
+} 

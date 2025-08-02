@@ -1,0 +1,131 @@
+@model CreateArticleViewModel
+@{
+    ViewData["Title"] = "Yeni Haber";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Yeni Haber</h1>
+            <p class="text-muted">Yeni bir haber oluşturun</p>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Main Content -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            Haber İçeriği
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label for="Title" class="form-label">Haber Başlığı <span class="text-danger">*</span></label>
+                            <input type="text" id="Title" name="Title" class="form-control form-control-lg" value="@Model.Title" placeholder="Haber başlığını girin..." required />
+                            <div class="form-text">Dikkat çekici ve açıklayıcı bir başlık kullanın.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Summary" class="form-label">Özet</label>
+                            <textarea id="Summary" name="Summary" class="form-control" rows="3" placeholder="Haberin kısa özetini girin...">@Model.Summary</textarea>
+                            <div class="form-text">Haberin ana fikrini özetleyen kısa bir açıklama.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Content" class="form-label">Haber İçeriği <span class="text-danger">*</span></label>
+                            <textarea id="Content" name="Content" class="form-control" rows="15" placeholder="Haberin detaylı içeriğini girin..." required>@Model.Content</textarea>
+                            <div class="form-text">Haberin tam içeriğini buraya yazın. HTML formatında yazabilirsiniz.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Sidebar -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            Ayarlar
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <label for="CategoryId" class="form-label">Kategori <span class="text-danger">*</span></label>
+                            <select id="CategoryId" name="CategoryId" class="form-select" required>
+                                <option value="">Kategori Seçin</option>
+                                @foreach (var category in Model.Categories)
+                                {
+                                    <option value="@category.Id" selected="@(category.Id == Model.CategoryId)">@category.Name</option>
+                                }
+                            </select>
+                            <div class="form-text">Haberi hangi kategori altında yayınlayacağınızı seçin.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Tags" class="form-label">Etiketler</label>
+                            <input type="text" id="Tags" name="Tags" class="form-control" value="@Model.Tags" placeholder="etiket1, etiket2, etiket3" />
+                            <div class="form-text">Virgülle ayırarak etiketleri girin.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" id="IsPublished" name="IsPublished" class="form-check-input" checked="@Model.IsPublished" />
+                                <label class="form-check-label" for="IsPublished">Hemen Yayınla</label>
+                            </div>
+                            <div class="form-text">İşaretlenirse haber hemen yayınlanır.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>İptal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Form validation
+            $('form').on('submit', function() {
+                const submitBtn = $(this).find('button[type="submit"]');
+                submitBtn.prop('disabled', true);
+                submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Kaydediliyor...');
+            });
+
+            // Character counter for summary
+            $('#Summary').on('input', function() {
+                const maxLength = 200;
+                const currentLength = $(this).val().length;
+                const remaining = maxLength - currentLength;
+                
+                if (currentLength > maxLength) {
+                    $(this).val($(this).val().substring(0, maxLength));
+                }
+            });
+        });
+    </script>
+} 

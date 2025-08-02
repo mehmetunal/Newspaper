@@ -1,0 +1,18 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Maggsoft.Core" />
+    <PackageReference Include="Maggsoft.Framework" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../Libraries/Dto/Newspaper.Dto.Mssql/Newspaper.Dto.Mssql.csproj" />
+  </ItemGroup>
+
+</Project>

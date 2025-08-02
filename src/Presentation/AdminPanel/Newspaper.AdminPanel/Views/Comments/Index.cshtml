@@ -1,0 +1,324 @@
+@model CommentListViewModel
+@{
+    ViewData["Title"] = "Yorum Yönetimi";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Yorum Yönetimi</h1>
+            <p class="text-muted">Sistem yorumlarını yönetin ve moderasyon yapın</p>
+        </div>
+        <div class="btn-group" role="group">
+            <a asp-action="Index" asp-route-status="pending" class="btn btn-warning">
+                <i class="fas fa-clock me-2"></i>Bekleyenler
+            </a>
+            <a asp-action="Index" asp-route-status="approved" class="btn btn-success">
+                <i class="fas fa-check me-2"></i>Onaylananlar
+            </a>
+            <a asp-action="Index" asp-route-status="rejected" class="btn btn-danger">
+                <i class="fas fa-times me-2"></i>Reddedilenler
+            </a>
+        </div>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Yorum ara..." value="@Model.SearchTerm" />
+                        <button type="submit" class="btn btn-outline-secondary">Ara</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="status" class="form-select" onchange="this.form.submit()">
+                        <option value="">Tüm Durumlar</option>
+                        <option value="pending" selected="@(Model.Status == "pending")">Bekleyen</option>
+                        <option value="approved" selected="@(Model.Status == "approved")">Onaylanan</option>
+                        <option value="rejected" selected="@(Model.Status == "rejected")">Reddedilen</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                        <option value="10" selected="@(Model.Comments.PageSize == 10)">10 kayıt</option>
+                        <option value="25" selected="@(Model.Comments.PageSize == 25)">25 kayıt</option>
+                        <option value="50" selected="@(Model.Comments.PageSize == 50)">50 kayıt</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Comments Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-comments me-2"></i>
+                Yorum Listesi
+                <span class="badge bg-primary ms-2">@Model.Comments.TotalCount</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Comments.Data.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Yorum</th>
+                                <th>Haber</th>
+                                <th>Yazar</th>
+                                <th>Durum</th>
+                                <th>Tarih</th>
+                                <th class="text-end">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var comment in Model.Comments.Data)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <div class="avatar-sm me-3">
+                                                <div class="avatar-initial rounded-circle bg-info text-white">
+                                                    @comment.AuthorName.Substring(0, 1).ToUpper()
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-semibold">
+                                                    @(comment.Content.Length > 100 ? comment.Content.Substring(0, 100) + "..." : comment.Content)
+                                                </div>
+                                                <small class="text-muted">
+                                                    @if (!string.IsNullOrEmpty(comment.ParentCommentContent))
+                                                    {
+                                                        <span class="text-primary">↳ Yanıt: @comment.ParentCommentContent</span>
+                                                    }
+                                                </small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-xs me-2">
+                                                <div class="avatar-initial rounded-circle bg-warning text-white">
+                                                    @comment.ArticleTitle.Substring(0, 1).ToUpper()
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold small">@comment.ArticleTitle</div>
+                                                <small class="text-muted">@comment.CategoryName</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-xs me-2">
+                                                <div class="avatar-initial rounded-circle bg-primary text-white">
+                                                    @comment.AuthorName.Substring(0, 1).ToUpper()
+                                                </div>
+                                            </div>
+                                            <span>@comment.AuthorName</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @switch (comment.Status)
+                                        {
+                                            case "pending":
+                                                <span class="badge bg-warning">
+                                                    <i class="fas fa-clock me-1"></i>Bekliyor
+                                                </span>
+                                                break;
+                                            case "approved":
+                                                <span class="badge bg-success">
+                                                    <i class="fas fa-check me-1"></i>Onaylandı
+                                                </span>
+                                                break;
+                                            case "rejected":
+                                                <span class="badge bg-danger">
+                                                    <i class="fas fa-times me-1"></i>Reddedildi
+                                                </span>
+                                                break;
+                                            default:
+                                                <span class="badge bg-secondary">@comment.Status</span>
+                                                break;
+                                        }
+                                    </td>
+                                    <td>
+                                        <span title="@comment.CreatedAt.ToString("dd.MM.yyyy HH:mm")">
+                                            @comment.CreatedAt.ToString("dd.MM.yyyy")
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Details" asp-route-id="@comment.Id" class="btn btn-sm btn-outline-info" title="Detay">
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            @if (comment.Status == "pending")
+                                            {
+                                                <button type="button" class="btn btn-sm btn-outline-success" title="Onayla" 
+                                                        onclick="approveComment('@comment.Id', '@comment.AuthorName')">
+                                                    <i class="fas fa-check"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-sm btn-outline-danger" title="Reddet" 
+                                                        onclick="rejectComment('@comment.Id', '@comment.AuthorName')">
+                                                    <i class="fas fa-times"></i>
+                                                </button>
+                                            }
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Sil" 
+                                                    onclick="deleteComment('@comment.Id', '@comment.AuthorName')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Comments.TotalPages > 1)
+                {
+                    <div class="card-footer">
+                        <nav aria-label="Yorum sayfaları">
+                            <ul class="pagination justify-content-center mb-0">
+                                @if (Model.Comments.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Comments.CurrentPage - 1)" asp-route-pageSize="@Model.Comments.PageSize" asp-route-searchTerm="@Model.SearchTerm" asp-route-status="@Model.Status">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.Comments.CurrentPage - 2); i <= Math.Min(Model.Comments.TotalPages, Model.Comments.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.Comments.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-pageSize="@Model.Comments.PageSize" asp-route-searchTerm="@Model.SearchTerm" asp-route-status="@Model.Status">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Model.Comments.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Comments.CurrentPage + 1)" asp-route-pageSize="@Model.Comments.PageSize" asp-route-searchTerm="@Model.SearchTerm" asp-route-status="@Model.Status">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-comments fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Yorum bulunamadı</h5>
+                    <p class="text-muted">Arama kriterlerinizi değiştirmeyi deneyin.</p>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Approve Confirmation Modal -->
+<div class="modal fade" id="approveModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yorum Onayla</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong id="approveCommentAuthor"></strong> adlı kullanıcının yorumunu onaylamak istediğinizden emin misiniz?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="approveForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-success">
+                        <i class="fas fa-check me-2"></i>Onayla
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Reject Confirmation Modal -->
+<div class="modal fade" id="rejectModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yorum Reddet</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong id="rejectCommentAuthor"></strong> adlı kullanıcının yorumunu reddetmek istediğinizden emin misiniz?</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="rejectForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-times me-2"></i>Reddet
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Yorum Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong id="deleteCommentAuthor"></strong> adlı kullanıcının yorumunu silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger small">Bu işlem geri alınamaz!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function approveComment(commentId, authorName) {
+            document.getElementById('approveCommentAuthor').textContent = authorName;
+            document.getElementById('approveForm').action = '@Url.Action("Approve")/' + commentId;
+            new bootstrap.Modal(document.getElementById('approveModal')).show();
+        }
+
+        function rejectComment(commentId, authorName) {
+            document.getElementById('rejectCommentAuthor').textContent = authorName;
+            document.getElementById('rejectForm').action = '@Url.Action("Reject")/' + commentId;
+            new bootstrap.Modal(document.getElementById('rejectModal')).show();
+        }
+
+        function deleteComment(commentId, authorName) {
+            document.getElementById('deleteCommentAuthor').textContent = authorName;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete")/' + commentId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+} 

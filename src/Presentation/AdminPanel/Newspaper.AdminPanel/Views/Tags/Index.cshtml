@@ -1,0 +1,221 @@
+@model TagListViewModel
+@{
+    ViewData["Title"] = "Etiket Yönetimi";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Etiket Yönetimi</h1>
+            <p class="text-muted">Sistem etiketlerini yönetin</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Yeni Etiket
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-8">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Etiket ara..." value="@Model.SearchTerm" />
+                        <button type="submit" class="btn btn-outline-secondary">Ara</button>
+                    </div>
+                </div>
+                <div class="col-md-2">
+                    <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                        <option value="10" selected="@(Model.Tags.PageSize == 10)">10 kayıt</option>
+                        <option value="25" selected="@(Model.Tags.PageSize == 25)">25 kayıt</option>
+                        <option value="50" selected="@(Model.Tags.PageSize == 50)">50 kayıt</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-refresh me-2"></i>Temizle
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Tags Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-tags me-2"></i>
+                Etiket Listesi
+                <span class="badge bg-primary ms-2">@Model.Tags.TotalCount</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Tags.Data.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Etiket</th>
+                                <th>Açıklama</th>
+                                <th>Haber Sayısı</th>
+                                <th>Durum</th>
+                                <th>Oluşturulma Tarihi</th>
+                                <th class="text-end">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tag in Model.Tags.Data)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3">
+                                                <div class="avatar-initial rounded-circle bg-primary text-white">
+                                                    @tag.Name.Substring(0, 1).ToUpper()
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">@tag.Name</div>
+                                                <small class="text-muted">@tag.Id</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(tag.Description))
+                                        {
+                                            <span>@(tag.Description.Length > 50 ? tag.Description.Substring(0, 50) + "..." : tag.Description)</span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">Açıklama yok</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@tag.ArticleCount</span>
+                                    </td>
+                                    <td>
+                                        @if (tag.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Aktif
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>Pasif
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span title="@tag.CreatedAt.ToString("dd.MM.yyyy HH:mm")">
+                                            @tag.CreatedAt.ToString("dd.MM.yyyy")
+                                        </span>
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Edit" asp-route-id="@tag.Id" class="btn btn-sm btn-outline-primary" title="Düzenle">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Sil" 
+                                                    onclick="deleteTag('@tag.Id', '@tag.Name')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Tags.TotalPages > 1)
+                {
+                    <div class="card-footer">
+                        <nav aria-label="Etiket sayfaları">
+                            <ul class="pagination justify-content-center mb-0">
+                                @if (Model.Tags.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Tags.CurrentPage - 1)" asp-route-pageSize="@Model.Tags.PageSize" asp-route-searchTerm="@Model.SearchTerm">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.Tags.CurrentPage - 2); i <= Math.Min(Model.Tags.TotalPages, Model.Tags.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.Tags.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-pageSize="@Model.Tags.PageSize" asp-route-searchTerm="@Model.SearchTerm">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Model.Tags.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Tags.CurrentPage + 1)" asp-route-pageSize="@Model.Tags.PageSize" asp-route-searchTerm="@Model.SearchTerm">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Etiket bulunamadı</h5>
+                    <p class="text-muted">Arama kriterlerinizi değiştirmeyi deneyin veya yeni bir etiket ekleyin.</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>İlk Etiketi Ekle
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Etiket Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong id="deleteTagName"></strong> adlı etiketi silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger small">Bu işlem geri alınamaz!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteTag(tagId, tagName) {
+            document.getElementById('deleteTagName').textContent = tagName;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete")/' + tagId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+} 

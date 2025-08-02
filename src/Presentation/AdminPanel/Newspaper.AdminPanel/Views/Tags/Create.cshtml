@@ -1,0 +1,96 @@
+@model CreateTagViewModel
+@{
+    ViewData["Title"] = "Yeni Etiket";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Yeni Etiket</h1>
+            <p class="text-muted">Yeni bir etiket oluşturun</p>
+        </div>
+        <a asp-action="Index" class="btn btn-secondary">
+            <i class="fas fa-arrow-left me-2"></i>Geri Dön
+        </a>
+    </div>
+
+    <form asp-action="Create" method="post">
+        <div class="row">
+            <div class="col-lg-8">
+                <!-- Main Content -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-edit me-2"></i>
+                            Etiket Bilgileri
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div asp-validation-summary="ModelOnly" class="alert alert-danger" role="alert"></div>
+
+                        <div class="mb-3">
+                            <label for="Name" class="form-label">Etiket Adı <span class="text-danger">*</span></label>
+                            <input type="text" id="Name" name="Name" class="form-control form-control-lg" value="@Model.Name" placeholder="Etiket adını girin..." required />
+                            <div class="form-text">Kısa ve açıklayıcı bir etiket adı kullanın.</div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="Description" class="form-label">Açıklama</label>
+                            <textarea id="Description" name="Description" class="form-control" rows="4" placeholder="Etiket hakkında açıklama girin...">@Model.Description</textarea>
+                            <div class="form-text">Etiketin ne için kullanıldığını açıklayın.</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-lg-4">
+                <!-- Sidebar -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5 class="mb-0">
+                            <i class="fas fa-cog me-2"></i>
+                            Ayarlar
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="mb-3">
+                            <div class="form-check form-switch">
+                                <input type="checkbox" id="IsActive" name="IsActive" class="form-check-input" checked="@Model.IsActive" />
+                                <label class="form-check-label" for="IsActive">Aktif</label>
+                            </div>
+                            <div class="form-text">İşaretlenirse etiket kullanılabilir durumda olur.</div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Actions -->
+                <div class="card">
+                    <div class="card-body">
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>Kaydet
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary">
+                                <i class="fas fa-times me-2"></i>İptal
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </form>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Form validation
+            $('form').on('submit', function() {
+                const submitBtn = $(this).find('button[type="submit"]');
+                submitBtn.prop('disabled', true);
+                submitBtn.html('<i class="fas fa-spinner fa-spin me-2"></i>Kaydediliyor...');
+            });
+        });
+    </script>
+} 

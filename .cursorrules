@@ -1,0 +1,243 @@
+$schema: https://raw.githubusercontent.com/cursor-dev/cursorrules/main/schema.json
+
+solution:
+  name: Newspaper
+  folders:
+    - name: src
+      folders:
+        - name: Libraries/Data
+          projects:
+            - name: {solution.name}.Data.Mssql
+              type: classlib
+              dependencies:
+                - Maggsoft.Data.Mssql
+              description: "Database Entity'leri içerir - Her entity ayrı dosyada olacak - Eğer birden fazla klasörlük iş yoksa dosyalar proje kökünde olacak"
+
+        - name: Libraries/Dto
+          projects:
+            - name: {solution.name}.Dto.Mssql
+              type: classlib
+              dependencies:
+                - Maggsoft.Core
+              description: "Database DTO'ları içerir - Her DTO ayrı dosyada olacak - DTO'lar gruplara göre klasörlere ayrılacak (User, Category, Article, Tag, Comment, Common)"
+
+        - name: Libraries/IdentityManager
+          projects:
+            - name: {solution.name}.IdentityManager
+              type: classlib
+              dependencies:
+                - Microsoft.AspNetCore.Identity.EntityFrameworkCore
+              references:
+                - ../Data/{solution.name}.Data.Mssql/{solution.name}.Data.Mssql.csproj
+              description: "Identity custom classları (AuditableSignInManager, CustomClaimsPrincipalFactory, UserConfirmation) - Her class ayrı dosyada olacak - Eğer birden fazla klasörlük iş yoksa dosyalar proje kökünde olacak"
+
+        - name: Libraries/Mssql
+          projects:
+            - name: {solution.name}.Mssql
+              type: classlib
+              dependencies:
+                - AspectCore.Abstractions
+                - FluentMigrator
+                - FluentMigrator.Runner
+                - FluentMigrator.Runner.SqlServer
+                - Maggsoft.Data
+                - Maggsoft.Mssql
+              references:
+                - ../Data/{solution.name}.Data.Mssql/{solution.name}.Data.Mssql.csproj
+              description: "DbContext ve FluentMigrations'ları içerir - Her migration ayrı dosyada olacak - Eğer birden fazla klasörlük iş yoksa dosyalar proje kökünde olacak"
+
+        - name: Libraries/Mssql.Services
+          projects:
+            - name: {solution.name}.Mssql.Services
+              type: classlib
+              dependencies:
+                - Maggsoft.Cache
+                - Maggsoft.Cache.MemoryCache
+                - Maggsoft.Mssql.Services
+              references:
+                - ../Data/{solution.name}.Data.Mssql/{solution.name}.Data.Mssql.csproj
+                - ../Dto/{solution.name}.Dto.Mssql/{solution.name}.Dto.Mssql.csproj
+                - ../Mssql/{solution.name}.Mssql/{solution.name}.Mssql.csproj
+              description: "Servislerin Interface ve Class'ları - AutoMapping burada yapılacak - Repository pattern kullanılmayacak, IMssqlRepository<T> kullanılacak - SaveChangesAsync her zaman tüm DB işleri bittikten sonra en son çağrılacak - Her service ayrı dosyada olacak - Eğer birden fazla klasörlük iş yoksa dosyalar proje kökünde olacak"
+
+        - name: Presentation/Api
+          projects:
+            - name: {solution.name}.Api
+              type: webapi
+              description: "API katmanı - Maggsoft.Framework.Middleware kullanılacak (ApiResponseMiddleware, ExceptionMiddleware, IPFilterMiddleware, GlobalResponseWrapperMiddleware) - JWT kullanılmayacak - Maggsoft.Core.Base Result<T> kullanılacak - Serilog MSSQL database'e log alacak - FluentValidation validasyonları kullanılacak - Migration ve SeedData minimal API endpoint'leri olarak eklenecek - Tüm tablolara seed data eklenecek, hiçbir tablo boş kalmayacak - IMigrationService ve SeedDataService ayrı servisler olarak oluşturulacak - Dosya yükleme işlemleri Maggsoft framework'ünün IFilesManager ve IMaggsoftFileProvider servisleri kullanılarak yapılacak - Dosya yükleme pattern'i: fileGuidId = Guid.NewGuid().ToString(), virtualPath = $'{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/content/folder/', fileExtension = _fileProvider.GetFileExtension(file.FileName), filePath = $'{virtualPath}{fileGuidId}{fileExtension}', _filesManager.FolderCreate(folderPath), _filesManager.FilesCreate(folderPath, file, fileGuidId)"
+              dependencies:
+                - FluentValidation
+                - FluentValidation.DependencyInjectionExtensions
+                - Maggsoft.Endpoints
+                - Maggsoft.Framework
+                - Bogus
+                - Maggsoft.Cache
+                - Maggsoft.Cache.MemoryCache
+                - Serilog.AspNetCore
+                - Serilog.Sinks.MSSqlServer
+                - Serilog.Settings.Configuration
+                - Microsoft.AspNetCore.Identity.EntityFrameworkCore
+                - Microsoft.AspNetCore.Authentication.JwtBearer
+                - Microsoft.IdentityModel.Tokens
+                - System.IdentityModel.Tokens.Jwt
+              description: "API katmanı - Maggsoft.Framework.Middleware kullanılacak (ApiResponseMiddleware, ExceptionMiddleware, IPFilterMiddleware, GlobalResponseWrapperMiddleware) - JWT kullanılmayacak - Maggsoft.Core.Base Result<T> kullanılacak - Serilog MSSQL database'e log alacak - FluentValidation validasyonları kullanılacak - Migration ve SeedData minimal API endpoint'leri olarak eklenecek - Tüm tablolara seed data eklenecek, hiçbir tablo boş kalmayacak - IMigrationService ve SeedDataService ayrı servisler olarak oluşturulacak - Dosya yükleme işlemleri Maggsoft framework'ünün IFilesManager ve IMaggsoftFileProvider servisleri kullanılarak yapılacak - Dosya yükleme pattern'i: fileGuidId = Guid.NewGuid().ToString(), virtualPath = $'{_httpContextAccessor.HttpContext.Request.Scheme}://{_httpContextAccessor.HttpContext.Request.Host}/content/folder/', fileExtension = _fileProvider.GetFileExtension(file.FileName), filePath = $'{virtualPath}{fileGuidId}{fileExtension}', _filesManager.FolderCreate(folderPath), _filesManager.FilesCreate(folderPath, file, fileGuidId)"
+              references:
+                - ../../Libraries/Mssql.Services/{solution.name}.Mssql.Services/{solution.name}.Mssql.Services.csproj
+                - ../../Libraries/IdentityManager/{solution.name}.IdentityManager/{solution.name}.IdentityManager.csproj
+                - ../../Libraries/Mssql/{solution.name}.Mssql/{solution.name}.Mssql.csproj
+                - ../../Libraries/Data/{solution.name}.Data.Mssql/{solution.name}.Data.Mssql.csproj
+                - ../../Libraries/Dto/{solution.name}.Dto.Mssql/{solution.name}.Dto.Mssql.csproj
+
+        - name: Presentation/Web
+          projects:
+            - name: {solution.name}.Web
+              type: web
+              dependencies:
+                - Maggsoft.Core
+                - Maggsoft.Framework
+              references:
+                - ../../Libraries/Dto/{solution.name}.Dto.Mssql/{solution.name}.Dto.Mssql.csproj
+                - ../Web.Framework/{solution.name}.Web.Framework.csproj
+              description: "Web projesi doğrudan Data, Service veya Entity katmanlarına erişemez, sadece API ile haberleşir."
+
+        - name: Presentation/AdminPanel
+          projects:
+            - name: {solution.name}.AdminPanel
+              type: web
+              dependencies:
+                - Maggsoft.Core
+                - Maggsoft.Framework
+              description: "Admin Panel projesi doğrudan Data, Service veya Entity katmanlarına erişemez, sadece API ile haberleşir."
+
+            - name: {solution.name}.Web.Framework
+              type: classlib
+              dependencies:
+                - Maggsoft.Core
+                - Maggsoft.Framework
+                - Microsoft.AspNetCore.Mvc.ViewFeatures
+
+options:
+  classlib:
+    removeClass1: true
+    empty: true
+  web:
+    empty: true
+  webapi:
+    empty: true
+
+seed_data:
+  admin_user:
+    email: "admin@gmail.com"
+    password: "Super123!"
+
+package_management:
+  central_package_management: true
+  directory_packages_props: true
+
+docker:
+  services:
+    mssql:
+      image: "mcr.microsoft.com/mssql/server:2022-latest"
+      ports:
+        - 1433:1433
+      environment:
+        ACCEPT_EULA: "Y"
+        SA_PASSWORD: "YourStrong!Passw0rd"
+        MSSQL_PID: "Express"
+      volumes:
+        - mssql-data:/var/opt/mssql
+  volumes:
+    - name: mssql-data
+
+# Web ve Admin Panel projelerinde AddIdentity kullanılmaz. Sadece aşağıdaki gibi Cookie Authentication ve Authorization ayarları yapılır:
+#
+# builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationScheme)
+#     .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme, opt =>
+#     {
+#         opt.LoginPath = "/Users/Login";
+#         opt.AccessDeniedPath = "/Users/Login";
+#         opt.ExpireTimeSpan = TimeSpan.FromDays(1);
+#         opt.Cookie.HttpOnly = true;
+#         opt.Cookie.IsEssential = true;
+#         opt.SlidingExpiration = true;
+#     });
+#
+# builder.Services.AddAuthorization();
+#
+# app.UseAuthentication();
+# app.UseAuthorization();
+
+# Web ve Admin Panel projelerinde API ile haberleşmek için IMaggsoftHttpClient kullanılır:
+# - CustomHttpClient sınıfı oluşturulur (Maggsoft.Framework.HttpClientApi.IMaggsoftHttpClient implementasyonu)
+# - Program.cs'de HttpClient ve CustomHttpClient register edilir (builder.Services.AddScoped<IMaggsoftHttpClient, CustomHttpClient>())
+# - Controller'larda IMaggsoftHttpClient interface'i kullanılır, CustomHttpClient concrete class'ı kullanılmaz
+# - appsettings.json'da ApiBaseUrl tanımlanır
+# - Tüm API çağrıları bu client üzerinden yapılır
+# - PagedListWrapper<T> modeli oluşturulur (API'den gelen PagedList'i karşılamak için)
+
+# Sayfalama işlemleri:
+# - Database sorgusunda: var pagedList = await query.ToPagedListAsync(request.PageNumber - 1, request.PageSize, new List<Filter>());
+# - Web ve Admin projelerinde API'den veri çekerken: await _httpClient.GetAsync<PagedListWrapper<PropertyDto>>("api/endpoint")
+# - PagedListWrapper<T> sınıfı API'den gelen PagedList<T> verilerini karşılamak için kullanılır
+
+# Validasyon Kuralları:
+# - Tüm validasyonlar FluentValidation ile yapılır
+# - Web ve Admin Panel projelerinde Data Annotations (Required, EmailAddress, vb.) kullanılmaz
+# - Validasyonlar sadece API katmanında yapılır, diğer projelerde validasyon yapılmaz
+# - Web ve Admin Panel projelerinde sadece ViewModels oluşturulur, validasyon attribute'ları eklenmez
+
+# DTO Kullanım Kuralları:
+# - Tüm DTO'lar src/Libraries/Dto/Newspaper.Dto.Mssql/ klasöründe tanımlanır
+# - Web ve Admin Panel projelerinde DTO'lar tekrar oluşturulmaz
+# - Web ve Admin Panel projelerinde sadece ViewModels oluşturulur
+# - API'den gelen DTO'lar ViewModels'e map edilir
+
+# Model/Class Organizasyon Kuralları:
+# - Her model/class kendi dosyasında tanımlanır (Single Responsibility Principle)
+# - Bir dosyada birden fazla class tanımlanmaz
+# - Dosya adı class adı ile aynı olmalıdır (PascalCase)
+# - Her class'ın kendine ait namespace'i olmalıdır
+# - İlişkili class'lar aynı klasörde gruplandırılabilir ama ayrı dosyalarda olmalıdır
+
+# IMaggsoftHttpClient Kullanım Kuralları:
+# - _httpClient.GetAsync<object> şeklinde kullanılmaz
+# - _httpClient.PostAsync<Result<object>> şeklinde kullanılmaz
+# - Doğrudan hedef tipi belirtilir: _httpClient.GetAsync<Result<T>>, _httpClient.PostAsync<Result<T>>
+# - Json deserialize edilecek class/dto/paging tipi açıkça belirtilir
+# - object kullanımı yerine tip güvenliği sağlanır
+# - API'den dönen response tipi belirtilir (UserDetailDto, CategoryDetailDto, ArticleDetailDto, vb.)
+
+# Admin Panel Rol Yetkilendirme Kuralları:
+# - Admin Panel'e giriş yapabilmek için kullanıcının "SuperAdmin", "Admin", "Editor", "Author", "Moderator" rollerinden birine sahip olması gerekir
+# - Rol hiyerarşisi: SuperAdmin > Admin > Editor > Author > Moderator > Viewer
+# - Login işleminde kullanıcının rolü kontrol edilir, yetkili rol yoksa giriş reddedilir
+# - Tüm Admin Panel sayfaları [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")] attribute'u ile korunur
+# - Controller seviyesinde rol bazlı yetkilendirme kullanılır:
+#   * Dashboard: [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")]
+#   * Users: [Authorize(Roles = "SuperAdmin,Admin,Moderator")]
+#   * Roles: [Authorize(Roles = "SuperAdmin,Admin")]
+#   * Categories: [Authorize(Roles = "SuperAdmin,Admin,Editor")]
+#   * Articles: [Authorize(Roles = "SuperAdmin,Admin,Editor,Author")]
+#   * Tags: [Authorize(Roles = "SuperAdmin,Admin,Editor")]
+#   * Comments: [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")]
+#   * Reports: [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")]
+#   * Settings: [Authorize(Roles = "SuperAdmin,Admin")]
+#   * Logs: [Authorize(Roles = "SuperAdmin,Admin")]
+# - Action seviyesinde özel yetkiler için [Authorize(Roles = "SuperAdmin")] kullanılır
+# - View seviyesinde @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin")) ile rol kontrolü yapılır
+# - Login başarılı olduğunda kullanıcının rolü Claims'e eklenir
+# - API'den gelen kullanıcı bilgilerinde RoleName property'si kontrol edilir
+# - Yetkisiz kullanıcılar Admin Panel'e erişemez ve login sayfasına yönlendirilir
+# - Varsayılan kullanıcılar:
+#   * SuperAdmin: admin@newspaper.com (Super123!)
+#   * Admin: manager@newspaper.com (Manager123!)
+#   * Editor: editor@newspaper.com (Editor123!)
+#   * Author: author@newspaper.com (Author123!)
+#   * Moderator: moderator@newspaper.com (Moderator123!)
+
+# Maggsoft IoC Servis Kuralları:
+# - Tüm Database servislerinin interface'leri Maggsoft.Core.IoC.IService'den türemelidir
+# - Program.cs'de builder.Services.RegisterAll<IService>(); şeklinde tüm servisler register edilir
+# - Manuel servis registration'ı yapılmaz, Maggsoft IoC sistemi kullanılır
+# - Her servis interface'i IService'den türetilir: public interface IUserService : IService
+# - Her servis class'ı IService'den türetilir: public class UserService : IService, IUserService

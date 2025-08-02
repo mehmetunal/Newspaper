@@ -1,0 +1,223 @@
+@model CategoryListViewModel
+@{
+    ViewData["Title"] = "Kategori Yönetimi";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Kategori Yönetimi</h1>
+            <p class="text-muted">Haber kategorilerini yönetin</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Yeni Kategori
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-6">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Kategori ara..." value="@Model.SearchTerm" />
+                        <button type="submit" class="btn btn-outline-secondary">Ara</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                        <option value="10" selected="@(Model.Categories.PageSize == 10)">10 kayıt</option>
+                        <option value="25" selected="@(Model.Categories.PageSize == 25)">25 kayıt</option>
+                        <option value="50" selected="@(Model.Categories.PageSize == 50)">50 kayıt</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-refresh me-2"></i>Temizle
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Categories Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-tags me-2"></i>
+                Kategori Listesi
+                <span class="badge bg-primary ms-2">@Model.Categories.TotalCount</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Categories.Data.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Kategori</th>
+                                <th>Açıklama</th>
+                                <th>Haber Sayısı</th>
+                                <th>Oluşturulma Tarihi</th>
+                                <th>Durum</th>
+                                <th class="text-end">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var category in Model.Categories.Data)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-sm me-3">
+                                                <div class="avatar-initial rounded-circle bg-info text-white">
+                                                    @category.Name.Substring(0, 1).ToUpper()
+                                                </div>
+                                            </div>
+                                            <div>
+                                                <div class="fw-semibold">@category.Name</div>
+                                                <small class="text-muted">ID: @category.Id</small>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (!string.IsNullOrEmpty(category.Description))
+                                        {
+                                            <span title="@category.Description">
+                                                @(category.Description.Length > 50 ? category.Description.Substring(0, 50) + "..." : category.Description)
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-secondary">@category.ArticleCount</span>
+                                    </td>
+                                    <td>
+                                        <span title="@category.CreatedAt.ToString("dd.MM.yyyy HH:mm")">
+                                            @category.CreatedAt.ToString("dd.MM.yyyy")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        @if (category.IsActive)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Aktif
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>Pasif
+                                            </span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Edit" asp-route-id="@category.Id" class="btn btn-sm btn-outline-primary" title="Düzenle">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Sil" 
+                                                    onclick="deleteCategory('@category.Id', '@category.Name')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Categories.TotalPages > 1)
+                {
+                    <div class="card-footer">
+                        <nav aria-label="Kategori sayfaları">
+                            <ul class="pagination justify-content-center mb-0">
+                                @if (Model.Categories.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Categories.CurrentPage - 1)" asp-route-pageSize="@Model.Categories.PageSize" asp-route-searchTerm="@Model.SearchTerm">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.Categories.CurrentPage - 2); i <= Math.Min(Model.Categories.TotalPages, Model.Categories.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.Categories.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-pageSize="@Model.Categories.PageSize" asp-route-searchTerm="@Model.SearchTerm">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Model.Categories.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Categories.CurrentPage + 1)" asp-route-pageSize="@Model.Categories.PageSize" asp-route-searchTerm="@Model.SearchTerm">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-tags fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Kategori bulunamadı</h5>
+                    <p class="text-muted">Arama kriterlerinizi değiştirmeyi deneyin veya yeni bir kategori ekleyin.</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>İlk Kategoriyi Ekle
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Kategori Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong id="deleteCategoryName"></strong> adlı kategoriyi silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger small">Bu işlem geri alınamaz!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteCategory(categoryId, categoryName) {
+            document.getElementById('deleteCategoryName').textContent = categoryName;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete")/' + categoryId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+} 

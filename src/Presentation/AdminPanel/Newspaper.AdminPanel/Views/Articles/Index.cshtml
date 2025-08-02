@@ -1,0 +1,249 @@
+@model ArticleListViewModel
+@{
+    ViewData["Title"] = "Haber Yönetimi";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0 text-gray-800">Haber Yönetimi</h1>
+            <p class="text-muted">Sistem haberlerini yönetin</p>
+        </div>
+        <a asp-action="Create" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Yeni Haber
+        </a>
+    </div>
+
+    <!-- Search and Filter -->
+    <div class="card mb-4">
+        <div class="card-body">
+            <form method="get" class="row g-3">
+                <div class="col-md-4">
+                    <div class="input-group">
+                        <span class="input-group-text">
+                            <i class="fas fa-search"></i>
+                        </span>
+                        <input type="text" name="searchTerm" class="form-control" placeholder="Haber ara..." value="@Model.SearchTerm" />
+                        <button type="submit" class="btn btn-outline-secondary">Ara</button>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <select name="categoryId" class="form-select">
+                        <option value="">Tüm Kategoriler</option>
+                        <!-- Kategoriler burada dinamik olarak yüklenecek -->
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select name="pageSize" class="form-select" onchange="this.form.submit()">
+                        <option value="10" selected="@(Model.Articles.PageSize == 10)">10 kayıt</option>
+                        <option value="25" selected="@(Model.Articles.PageSize == 25)">25 kayıt</option>
+                        <option value="50" selected="@(Model.Articles.PageSize == 50)">50 kayıt</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <a asp-action="Index" class="btn btn-outline-secondary">
+                        <i class="fas fa-refresh me-2"></i>Temizle
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Articles Table -->
+    <div class="card">
+        <div class="card-header">
+            <h5 class="mb-0">
+                <i class="fas fa-newspaper me-2"></i>
+                Haber Listesi
+                <span class="badge bg-primary ms-2">@Model.Articles.TotalCount</span>
+            </h5>
+        </div>
+        <div class="card-body p-0">
+            @if (Model.Articles.Data.Any())
+            {
+                <div class="table-responsive">
+                    <table class="table table-hover mb-0">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Haber</th>
+                                <th>Kategori</th>
+                                <th>Yazar</th>
+                                <th>Durum</th>
+                                <th>Yayın Tarihi</th>
+                                <th class="text-end">İşlemler</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var article in Model.Articles.Data)
+                            {
+                                <tr>
+                                    <td>
+                                        <div class="d-flex align-items-start">
+                                            <div class="avatar-sm me-3">
+                                                <div class="avatar-initial rounded-circle bg-warning text-white">
+                                                    @article.Title.Substring(0, 1).ToUpper()
+                                                </div>
+                                            </div>
+                                            <div class="flex-grow-1">
+                                                <div class="fw-semibold">@article.Title</div>
+                                                <small class="text-muted">
+                                                    @(article.Summary?.Length > 80 ? article.Summary.Substring(0, 80) + "..." : article.Summary)
+                                                </small>
+                                                <div class="mt-1">
+                                                    @if (article.Tags?.Any() == true)
+                                                    {
+                                                        @foreach (var tag in article.Tags.Take(3))
+                                                        {
+                                                            <span class="badge bg-light text-dark me-1">@tag</span>
+                                                        }
+                                                        @if (article.Tags.Count > 3)
+                                                        {
+                                                            <span class="badge bg-light text-dark">+@(article.Tags.Count - 3)</span>
+                                                        }
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        <span class="badge bg-info">@article.CategoryName</span>
+                                    </td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="avatar-xs me-2">
+                                                <div class="avatar-initial rounded-circle bg-primary text-white">
+                                                    @article.AuthorName.Substring(0, 1).ToUpper()
+                                                </div>
+                                            </div>
+                                            <span>@article.AuthorName</span>
+                                        </div>
+                                    </td>
+                                    <td>
+                                        @if (article.IsPublished)
+                                        {
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Yayında
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="badge bg-warning">
+                                                <i class="fas fa-clock me-1"></i>Taslak
+                                            </span>
+                                        }
+                                    </td>
+                                    <td>
+                                        @if (article.PublishedAt.HasValue)
+                                        {
+                                            <span title="@article.PublishedAt.Value.ToString("dd.MM.yyyy HH:mm")">
+                                                @article.PublishedAt.Value.ToString("dd.MM.yyyy")
+                                            </span>
+                                        }
+                                        else
+                                        {
+                                            <span class="text-muted">-</span>
+                                        }
+                                    </td>
+                                    <td class="text-end">
+                                        <div class="btn-group" role="group">
+                                            <a asp-action="Edit" asp-route-id="@article.Id" class="btn btn-sm btn-outline-primary" title="Düzenle">
+                                                <i class="fas fa-edit"></i>
+                                            </a>
+                                            <button type="button" class="btn btn-sm btn-outline-danger" title="Sil" 
+                                                    onclick="deleteArticle('@article.Id', '@article.Title')">
+                                                <i class="fas fa-trash"></i>
+                                            </button>
+                                        </div>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Pagination -->
+                @if (Model.Articles.TotalPages > 1)
+                {
+                    <div class="card-footer">
+                        <nav aria-label="Haber sayfaları">
+                            <ul class="pagination justify-content-center mb-0">
+                                @if (Model.Articles.HasPreviousPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Articles.CurrentPage - 1)" asp-route-pageSize="@Model.Articles.PageSize" asp-route-searchTerm="@Model.SearchTerm" asp-route-categoryId="@Model.CategoryId">
+                                            <i class="fas fa-chevron-left"></i>
+                                        </a>
+                                    </li>
+                                }
+
+                                @for (int i = Math.Max(1, Model.Articles.CurrentPage - 2); i <= Math.Min(Model.Articles.TotalPages, Model.Articles.CurrentPage + 2); i++)
+                                {
+                                    <li class="page-item @(i == Model.Articles.CurrentPage ? "active" : "")">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@i" asp-route-pageSize="@Model.Articles.PageSize" asp-route-searchTerm="@Model.SearchTerm" asp-route-categoryId="@Model.CategoryId">
+                                            @i
+                                        </a>
+                                    </li>
+                                }
+
+                                @if (Model.Articles.HasNextPage)
+                                {
+                                    <li class="page-item">
+                                        <a class="page-link" asp-action="Index" asp-route-page="@(Model.Articles.CurrentPage + 1)" asp-route-pageSize="@Model.Articles.PageSize" asp-route-searchTerm="@Model.SearchTerm" asp-route-categoryId="@Model.CategoryId">
+                                            <i class="fas fa-chevron-right"></i>
+                                        </a>
+                                    </li>
+                                }
+                            </ul>
+                        </nav>
+                    </div>
+                }
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="fas fa-newspaper fa-3x text-muted mb-3"></i>
+                    <h5 class="text-muted">Haber bulunamadı</h5>
+                    <p class="text-muted">Arama kriterlerinizi değiştirmeyi deneyin veya yeni bir haber ekleyin.</p>
+                    <a asp-action="Create" class="btn btn-primary">
+                        <i class="fas fa-plus me-2"></i>İlk Haberi Ekle
+                    </a>
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteModal" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Haber Sil</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong id="deleteArticleTitle"></strong> adlı haberi silmek istediğinizden emin misiniz?</p>
+                <p class="text-danger small">Bu işlem geri alınamaz!</p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">İptal</button>
+                <form id="deleteForm" method="post" style="display: inline;">
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Sil
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        function deleteArticle(articleId, articleTitle) {
+            document.getElementById('deleteArticleTitle').textContent = articleTitle;
+            document.getElementById('deleteForm').action = '@Url.Action("Delete")/' + articleId;
+            new bootstrap.Modal(document.getElementById('deleteModal')).show();
+        }
+    </script>
+} 

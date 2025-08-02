@@ -1,0 +1,44 @@
+# Use the official .NET 8.0 runtime image
+FROM mcr.microsoft.com/dotnet/aspnet:8.0 AS base
+WORKDIR /app
+EXPOSE 80
+EXPOSE 443
+
+# Use the official .NET 8.0 SDK image for building
+FROM mcr.microsoft.com/dotnet/sdk:8.0 AS build
+WORKDIR /src
+
+# Copy the solution file and restore dependencies
+COPY *.sln ./
+COPY Directory.Packages.props ./
+COPY nuget.config ./
+
+# Copy all project files
+COPY src/Libraries/Data/Newspaper.Data.Mssql/*.csproj ./src/Libraries/Data/Newspaper.Data.Mssql/
+COPY src/Libraries/Dto/Newspaper.Dto.Mssql/*.csproj ./src/Libraries/Dto/Newspaper.Dto.Mssql/
+COPY src/Libraries/IdentityManager/Newspaper.IdentityManager/*.csproj ./src/Libraries/IdentityManager/Newspaper.IdentityManager/
+COPY src/Libraries/Mssql/Newspaper.Mssql/*.csproj ./src/Libraries/Mssql/Newspaper.Mssql/
+COPY src/Libraries/Mssql.Services/Newspaper.Mssql.Services/*.csproj ./src/Libraries/Mssql.Services/Newspaper.Mssql.Services/
+COPY src/Presentation/Web/Newspaper.Web/*.csproj ./src/Presentation/Web/Newspaper.Web/
+COPY src/Presentation/Web/Newspaper.Web.Framework/*.csproj ./src/Presentation/Web/Newspaper.Web.Framework/
+
+# Restore dependencies
+RUN dotnet restore src/Presentation/Web/Newspaper.Web/Newspaper.Web.csproj
+
+# Copy the rest of the source code
+COPY . .
+
+# Build the application
+WORKDIR /src/src/Presentation/Web/Newspaper.Web
+RUN dotnet build "Newspaper.Web.csproj" -c Release -o /app/build
+
+# Publish the application
+FROM build AS publish
+RUN dotnet publish "Newspaper.Web.csproj" -c Release -o /app/publish /p:UseAppHost=false
+
+# Build the final runtime image
+FROM base AS final
+WORKDIR /app
+COPY --from=publish /app/publish .
+
+ENTRYPOINT ["dotnet", "Newspaper.Web.dll"] 

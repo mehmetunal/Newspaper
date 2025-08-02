@@ -1,0 +1,213 @@
+@model Newspaper.AdminPanel.Models.CreateRoleViewModel
+
+@{
+    ViewData["Title"] = "Yeni Rol Oluştur";
+}
+
+<div class="container-fluid">
+    <!-- Page Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <div>
+            <h1 class="h3 mb-0">Yeni Rol Oluştur</h1>
+            <p class="text-muted">Sisteme yeni bir rol ekleyin ve yetkilendirmeleri tanımlayın.</p>
+        </div>
+        <a href="@Url.Action("Index")" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left me-2"></i>
+            Geri Dön
+        </a>
+    </div>
+
+    <div class="row">
+        <div class="col-lg-8">
+            <!-- Create Role Form -->
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">
+                        <i class="fas fa-user-shield me-2"></i>
+                        Rol Bilgileri
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Create" method="post">
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label asp-for="Name" class="form-label"></label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-tag"></i>
+                                    </span>
+                                    <input asp-for="Name" class="form-control" placeholder="Örn: Editor, Moderator">
+                                </div>
+                                <span asp-validation-for="Name" class="text-danger"></span>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label class="form-label">Rol Türü</label>
+                                <div class="input-group">
+                                    <span class="input-group-text">
+                                        <i class="fas fa-layer-group"></i>
+                                    </span>
+                                    <select class="form-select" id="roleType">
+                                        <option value="">Özel Rol</option>
+                                        <option value="admin">Yönetici</option>
+                                        <option value="editor">Editör</option>
+                                        <option value="author">Yazar</option>
+                                        <option value="moderator">Moderatör</option>
+                                        <option value="viewer">Görüntüleyici</option>
+                                    </select>
+                                </div>
+                                <small class="text-muted">Önceden tanımlı rol türlerinden seçebilirsiniz</small>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Description" class="form-label"></label>
+                            <div class="input-group">
+                                <span class="input-group-text">
+                                    <i class="fas fa-align-left"></i>
+                                </span>
+                                <textarea asp-for="Description" class="form-control" rows="3" 
+                                          placeholder="Bu rolün ne yapabileceğini açıklayın..."></textarea>
+                            </div>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-end gap-2">
+                            <a href="@Url.Action("Index")" class="btn btn-secondary">
+                                <i class="fas fa-times me-2"></i>
+                                İptal
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-save me-2"></i>
+                                Rol Oluştur
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-4">
+            <!-- Role Templates -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-lightbulb me-2"></i>
+                        Rol Şablonları
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <button type="button" class="btn btn-outline-primary btn-sm" onclick="fillRoleTemplate('admin')">
+                            <i class="fas fa-crown me-2"></i>
+                            Yönetici
+                        </button>
+                        <button type="button" class="btn btn-outline-success btn-sm" onclick="fillRoleTemplate('editor')">
+                            <i class="fas fa-edit me-2"></i>
+                            Editör
+                        </button>
+                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="fillRoleTemplate('author')">
+                            <i class="fas fa-pen me-2"></i>
+                            Yazar
+                        </button>
+                        <button type="button" class="btn btn-outline-info btn-sm" onclick="fillRoleTemplate('moderator')">
+                            <i class="fas fa-shield-alt me-2"></i>
+                            Moderatör
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary btn-sm" onclick="fillRoleTemplate('viewer')">
+                            <i class="fas fa-eye me-2"></i>
+                            Görüntüleyici
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Role Permissions Info -->
+            <div class="card">
+                <div class="card-header">
+                    <h6 class="mb-0">
+                        <i class="fas fa-info-circle me-2"></i>
+                        Yetki Bilgileri
+                    </h6>
+                </div>
+                <div class="card-body">
+                    <div class="mb-3">
+                        <h6 class="text-primary">Yönetici</h6>
+                        <small class="text-muted">Tüm sistem yetkilerine sahiptir</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-success">Editör</h6>
+                        <small class="text-muted">İçerik yönetimi ve yayınlama yetkisi</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-warning">Yazar</h6>
+                        <small class="text-muted">Makale yazma ve düzenleme yetkisi</small>
+                    </div>
+                    <div class="mb-3">
+                        <h6 class="text-info">Moderatör</h6>
+                        <small class="text-muted">Yorum moderasyonu yetkisi</small>
+                    </div>
+                    <div>
+                        <h6 class="text-secondary">Görüntüleyici</h6>
+                        <small class="text-muted">Sadece içerik görüntüleme yetkisi</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Role templates
+        const roleTemplates = {
+            admin: {
+                name: 'Admin',
+                description: 'Sistem yöneticisi. Tüm yetkilere sahiptir.'
+            },
+            editor: {
+                name: 'Editor',
+                description: 'İçerik editörü. Makaleleri düzenleyebilir ve yayınlayabilir.'
+            },
+            author: {
+                name: 'Author',
+                description: 'Makale yazarı. Kendi makalelerini yazabilir ve düzenleyebilir.'
+            },
+            moderator: {
+                name: 'Moderator',
+                description: 'Yorum moderatörü. Yorumları onaylayabilir ve yönetebilir.'
+            },
+            viewer: {
+                name: 'Viewer',
+                description: 'Görüntüleyici. Sadece içerikleri görüntüleyebilir.'
+            }
+        };
+
+        function fillRoleTemplate(type) {
+            const template = roleTemplates[type];
+            if (template) {
+                document.getElementById('Name').value = template.name;
+                document.getElementById('Description').value = template.description;
+                document.getElementById('roleType').value = type;
+            }
+        }
+
+        // Role type change handler
+        document.getElementById('roleType').addEventListener('change', function() {
+            const selectedType = this.value;
+            if (selectedType && roleTemplates[selectedType]) {
+                fillRoleTemplate(selectedType);
+            }
+        });
+
+        // Form validation
+        document.querySelector('form').addEventListener('submit', function(e) {
+            const name = document.getElementById('Name').value.trim();
+            if (!name) {
+                e.preventDefault();
+                alert('Rol adı zorunludur!');
+                return false;
+            }
+        });
+    </script>
+} 

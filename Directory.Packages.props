@@ -1,0 +1,56 @@
+<Project>
+  <PropertyGroup>
+    <ManagePackageVersionsCentrally>true</ManagePackageVersionsCentrally>
+  </PropertyGroup>
+  <ItemGroup>
+    <!-- Maggsoft Framework Paketleri -->
+    <PackageVersion Include="Maggsoft.Core" Version="2.0.39" />
+    <PackageVersion Include="Maggsoft.Data" Version="2.0.20" />
+    <PackageVersion Include="Maggsoft.Framework" Version="2.3.6" />
+    <PackageVersion Include="Maggsoft.Data.Mssql" Version="2.0.10" />
+    <PackageVersion Include="Maggsoft.Mssql" Version="2.0.12" />
+    <PackageVersion Include="Maggsoft.Cache" Version="2.0.22" />
+    <PackageVersion Include="Maggsoft.Cache.MemoryCache" Version="2.0.7" />
+    <PackageVersion Include="Maggsoft.Services" Version="2.0.8" />
+    <PackageVersion Include="Maggsoft.Aspect.Core" Version="1.0.15" />
+    <PackageVersion Include="Maggsoft.Mssql.Services" Version="2.0.17" />
+    <PackageVersion Include="Maggsoft.Endpoints" Version="2.0.7" />
+    <PackageVersion Include="Maggsoft.Dto.Mssql" Version="1.0.2" />
+    <PackageVersion Include="Maggsoft.Logging" Version="1.0.6" />
+    <PackageVersion Include="Maggsoft.EventBus" Version="1.0.19" />
+    <!-- Microsoft Identity ve Entity Framework -->
+    <PackageVersion Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="8.0.5" />
+    <PackageVersion Include="Microsoft.AspNetCore.Identity" Version="2.2.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Design" Version="9.0.7">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageVersion>
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.EntityFrameworkCore.Tools" Version="9.0.0" />
+    <PackageVersion Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="9.0.0" />
+    <!-- Validation ve Mapping -->
+    <PackageVersion Include="FluentValidation" Version="11.9.0" />
+    <PackageVersion Include="FluentValidation.DependencyInjectionExtensions" Version="11.9.0" />
+    <PackageVersion Include="AutoMapper" Version="13.0.1" />
+    <PackageVersion Include="AutoMapper.Extensions.Microsoft.DependencyInjection" Version="12.0.1" />
+    <!-- Migration -->
+    <PackageVersion Include="FluentMigrator" Version="6.2.0" />
+    <PackageVersion Include="FluentMigrator.Runner" Version="6.2.0" />
+    <PackageVersion Include="FluentMigrator.Runner.SqlServer" Version="6.2.0" />
+    <!-- Logging -->
+    <PackageVersion Include="Serilog.AspNetCore" Version="8.0.1" />
+    <PackageVersion Include="Serilog.Sinks.MSSqlServer" Version="6.5.0" />
+    <PackageVersion Include="Serilog.Settings.Configuration" Version="8.0.0" />
+    <!-- API Documentation -->
+    <PackageVersion Include="Swashbuckle.AspNetCore" Version="7.1.0" />
+    <!-- Test Data -->
+    <PackageVersion Include="Bogus" Version="35.4.0" />
+    <!-- AOP -->
+    <PackageVersion Include="AspectCore.Abstractions" Version="2.4.0" />
+    <!-- MVC -->
+    <PackageVersion Include="Microsoft.AspNetCore.Mvc.ViewFeatures" Version="2.2.0" />
+    <!-- Image Processing -->
+    <PackageVersion Include="System.Drawing.Common" Version="9.0.0" />
+  </ItemGroup>
+</Project>

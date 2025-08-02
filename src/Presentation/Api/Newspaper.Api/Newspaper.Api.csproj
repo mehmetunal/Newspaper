@@ -1,0 +1,38 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <RootNamespace>Newspaper.Api</RootNamespace>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="FluentValidation" />
+    <PackageReference Include="FluentValidation.DependencyInjectionExtensions" />
+    <PackageReference Include="Maggsoft.Endpoints" />
+    <PackageReference Include="Maggsoft.Framework" />
+    <PackageReference Include="Bogus" />
+    <PackageReference Include="Maggsoft.Cache" />
+    <PackageReference Include="Maggsoft.Cache.MemoryCache" />
+    <PackageReference Include="Microsoft.EntityFrameworkCore.Design">
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+      <PrivateAssets>all</PrivateAssets>
+    </PackageReference>
+    <PackageReference Include="Serilog.AspNetCore" />
+    <PackageReference Include="Serilog.Sinks.MSSqlServer" />
+    <PackageReference Include="Serilog.Settings.Configuration" />
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" />
+    <PackageReference Include="Swashbuckle.AspNetCore" />
+    <PackageReference Include="System.Drawing.Common" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../../Libraries/Mssql.Services/Newspaper.Mssql.Services/Newspaper.Mssql.Services.csproj" />
+    <ProjectReference Include="../../../Libraries/IdentityManager/Newspaper.IdentityManager/Newspaper.IdentityManager.csproj" />
+    <ProjectReference Include="../../../Libraries/Mssql/Newspaper.Mssql/Newspaper.Mssql.csproj" />
+    <ProjectReference Include="../../../Libraries/Data/Newspaper.Data.Mssql/Newspaper.Data.Mssql.csproj" />
+    <ProjectReference Include="../../../Libraries/Dto/Newspaper.Dto.Mssql/Newspaper.Dto.Mssql.csproj" />
+  </ItemGroup>
+
+</Project>

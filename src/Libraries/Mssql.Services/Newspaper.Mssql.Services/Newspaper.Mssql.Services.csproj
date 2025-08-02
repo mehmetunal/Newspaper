@@ -1,0 +1,23 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <ImplicitUsings>enable</ImplicitUsings>
+    <Nullable>enable</Nullable>
+  </PropertyGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Maggsoft.Cache" />
+    <PackageReference Include="Maggsoft.Cache.MemoryCache" />
+    <PackageReference Include="Maggsoft.Mssql.Services" />
+    <PackageReference Include="AutoMapper" />
+    <PackageReference Include="AutoMapper.Extensions.Microsoft.DependencyInjection" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="../../Data/Newspaper.Data.Mssql/Newspaper.Data.Mssql.csproj" />
+    <ProjectReference Include="../../Dto/Newspaper.Dto.Mssql/Newspaper.Dto.Mssql.csproj" />
+    <ProjectReference Include="../../Mssql/Newspaper.Mssql/Newspaper.Mssql.csproj" />
+  </ItemGroup>
+
+</Project>
