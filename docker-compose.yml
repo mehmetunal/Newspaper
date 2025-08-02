@@ -1,5 +1,3 @@
-version: '3.8'
-
 services:
   # MSSQL Database
   mssql:
@@ -14,9 +12,6 @@ services:
       MSSQL_TCP_PORT: 1433
     volumes:
       - mssql-data:/var/opt/mssql
-      - ./database/init:/docker-entrypoint-initdb.d
-    networks:
-      - newspaper-network
     restart: unless-stopped
     healthcheck:
       test: ["CMD-SHELL", "/opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P YourStrong!Passw0rd -Q 'SELECT 1' || exit 1"]
@@ -25,49 +20,6 @@ services:
       retries: 10
       start_period: 10s
 
-  # Newspaper API
-  newspaper-api:
-    build:
-      context: .
-      dockerfile: Dockerfile
-    container_name: newspaper-api
-    ports:
-      - "5000:80"
-      - "5001:443"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ConnectionStrings__DefaultConnection=Server=mssql,1433;Database=NewspaperDb;User Id=sa;Password=YourStrong!Passw0rd;TrustServerCertificate=true;MultipleActiveResultSets=true
-    depends_on:
-      mssql:
-        condition: service_healthy
-    networks:
-      - newspaper-network
-    restart: unless-stopped
-    volumes:
-      - ./src/Presentation/Api/Newspaper.Api/wwwroot:/app/wwwroot
-
-  # Newspaper Web (Frontend)
-  newspaper-web:
-    build:
-      context: .
-      dockerfile: Dockerfile.Web
-    container_name: newspaper-web
-    ports:
-      - "8080:80"
-      - "8081:443"
-    environment:
-      - ASPNETCORE_ENVIRONMENT=Development
-      - ApiBaseUrl=http://newspaper-api
-    depends_on:
-      - newspaper-api
-    networks:
-      - newspaper-network
-    restart: unless-stopped
-
 volumes:
   mssql-data:
-    driver: local
-
-networks:
-  newspaper-network:
-    driver: bridge 
+    driver: local 

@@ -35,7 +35,7 @@ namespace Newspaper.Mssql
             // User entity konfigürasyonu
             builder.Entity<User>(entity =>
             {
-                entity.ToTable("Users");
+                entity.ToTable("AspNetUsers");
                 entity.HasKey(e => e.Id);
                 entity.Property(e => e.FirstName).IsRequired().HasMaxLength(50);
                 entity.Property(e => e.LastName).IsRequired().HasMaxLength(50);
@@ -43,6 +43,17 @@ namespace Newspaper.Mssql
                 entity.Property(e => e.Biography).HasMaxLength(1000);
                 entity.Property(e => e.Gender).HasDefaultValue(0);
                 entity.Property(e => e.LastLoginDate);
+            });
+
+            // Role entity konfigürasyonu
+            builder.Entity<Role>(entity =>
+            {
+                entity.ToTable("AspNetRoles");
+                entity.HasKey(e => e.Id);
+                entity.Property(e => e.Description).HasMaxLength(500);
+                entity.Property(e => e.CreatedAt).HasDefaultValueSql("GETUTCDATE()");
+                entity.Property(e => e.IsActive).HasDefaultValue(true);
+                entity.Property(e => e.IsDeleted).HasDefaultValue(false);
             });
 
             // Category entity konfigürasyonu

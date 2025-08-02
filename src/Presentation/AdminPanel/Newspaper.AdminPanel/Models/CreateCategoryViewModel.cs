@@ -13,8 +13,11 @@ namespace Newspaper.AdminPanel.Models
         [Display(Name = "Açıklama")]
         public string? Description { get; set; }
 
-        [StringLength(100, ErrorMessage = "Slug en fazla 100 karakter olabilir")]
-        [Display(Name = "Slug")]
-        public string? Slug { get; set; }
-    }
+            [StringLength(100, ErrorMessage = "Slug en fazla 100 karakter olabilir")]
+    [Display(Name = "Slug")]
+    public string? Slug { get; set; }
+
+    [Display(Name = "Aktif")]
+    public bool IsActive { get; set; } = true;
+}
 } 

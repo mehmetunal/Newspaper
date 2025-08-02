@@ -712,3 +712,10 @@ public class PagedListWrapper<T>
     }
 }
 ```
+
+
+## docker run
+    -- docker ps -a
+    -- docker stop <container_adı_veya_id>
+    -- docker rm <container_adı_veya_id>
+    -- docker compose up -d

@@ -54,5 +54,10 @@ namespace Newspaper.Dto.Mssql
         /// Sıralama
         /// </summary>
         public int Order { get; set; } = 0;
+
+        /// <summary>
+        /// Aktif/Pasif durumu
+        /// </summary>
+        public bool IsActive { get; set; } = true;
     }
 } 

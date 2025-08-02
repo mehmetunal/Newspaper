@@ -19,6 +19,7 @@ namespace Newspaper.Dto.Mssql
         public DateTime? BirthDate { get; set; }
         public int Gender { get; set; }
         public DateTime? LastLoginDate { get; set; }
+        public bool IsActive { get; set; }
         public int ArticleCount { get; set; }
         public int CommentCount { get; set; }
         public List<string> Roles { get; set; } = new List<string>();

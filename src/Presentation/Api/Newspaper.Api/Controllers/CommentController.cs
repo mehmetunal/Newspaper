@@ -10,19 +10,11 @@ namespace Newspaper.Api.Controllers
     /// <summary>
     /// Yorum işlemleri
     /// </summary>
-    public class CommentController : BaseController
+    public class CommentController(
+        ICommentService commentService,
+        ILogger<CommentController> logger)
+        : BaseController
     {
-        private readonly ICommentService _commentService;
-        private readonly ILogger<CommentController> _logger;
-
-        public CommentController(
-            ICommentService commentService,
-            ILogger<CommentController> logger)
-        {
-            _commentService = commentService;
-            _logger = logger;
-        }
-
         /// <summary>
         /// Yorumları listeler
         /// </summary>
@@ -41,12 +33,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var comments = await _commentService.GetCommentsAsync(page, pageSize, articleId, status);
+                var comments = await commentService.GetCommentsAsync(page, pageSize, articleId, status);
                 return Success(comments);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yorumlar listelenirken hata oluştu");
+                logger.LogError(ex, "Yorumlar listelenirken hata oluştu");
                 return Error<PagedList<CommentListDto>>("Yorumlar listelenirken hata oluştu", 500);
             }
         }
@@ -67,12 +59,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var comments = await _commentService.GetCommentsByArticleAsync(articleId, page, pageSize);
+                var comments = await commentService.GetCommentsByArticleAsync(articleId, page, pageSize);
                 return Success(comments);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale yorumları getirilirken hata oluştu. Article ID: {ArticleId}", articleId);
+                logger.LogError(ex, "Makale yorumları getirilirken hata oluştu. Article ID: {ArticleId}", articleId);
                 return Error<PagedList<CommentListDto>>("Makale yorumları getirilirken hata oluştu", 500);
             }
         }
@@ -88,12 +80,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var comments = await _commentService.GetRecentCommentsAsync(count);
+                var comments = await commentService.GetRecentCommentsAsync(count);
                 return Success(comments);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Son yorumlar getirilirken hata oluştu");
+                logger.LogError(ex, "Son yorumlar getirilirken hata oluştu");
                 return Error<List<CommentListDto>>("Son yorumlar getirilirken hata oluştu", 500);
             }
         }
@@ -109,12 +101,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var comments = await _commentService.GetPendingCommentsAsync(count);
+                var comments = await commentService.GetPendingCommentsAsync(count);
                 return Success(comments);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Bekleyen yorumlar getirilirken hata oluştu");
+                logger.LogError(ex, "Bekleyen yorumlar getirilirken hata oluştu");
                 return Error<List<CommentListDto>>("Bekleyen yorumlar getirilirken hata oluştu", 500);
             }
         }
@@ -130,7 +122,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var comment = await _commentService.GetCommentByIdAsync(id);
+                var comment = await commentService.GetCommentByIdAsync(id);
                 if (comment == null)
                 {
                     return Error<CommentListDto>("Yorum bulunamadı", 404);
@@ -140,7 +132,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yorum detayı getirilirken hata oluştu. ID: {CommentId}", id);
+                logger.LogError(ex, "Yorum detayı getirilirken hata oluştu. ID: {CommentId}", id);
                 return Error<CommentListDto>("Yorum detayı getirilirken hata oluştu", 500);
             }
         }
@@ -166,12 +158,12 @@ namespace Newspaper.Api.Controllers
                 createCommentDto.IpAddress = HttpContext.Connection.RemoteIpAddress?.ToString();
                 createCommentDto.UserAgent = HttpContext.Request.Headers["User-Agent"].ToString();
 
-                var comment = await _commentService.CreateCommentAsync(createCommentDto, userId.Value);
+                var comment = await commentService.CreateCommentAsync(createCommentDto, userId.Value);
                 return Success(comment, "Yorum başarıyla oluşturuldu");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yorum oluşturulurken hata oluştu");
+                logger.LogError(ex, "Yorum oluşturulurken hata oluştu");
                 return Error<CommentListDto>("Yorum oluşturulurken hata oluştu", 500);
             }
         }
@@ -189,12 +181,12 @@ namespace Newspaper.Api.Controllers
             try
             {
                 updateCommentDto.Id = id;
-                var comment = await _commentService.UpdateCommentAsync(updateCommentDto);
+                var comment = await commentService.UpdateCommentAsync(updateCommentDto);
                 return Success(comment, "Yorum başarıyla güncellendi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yorum güncellenirken hata oluştu. ID: {CommentId}", id);
+                logger.LogError(ex, "Yorum güncellenirken hata oluştu. ID: {CommentId}", id);
                 return Error<CommentListDto>("Yorum güncellenirken hata oluştu", 500);
             }
         }
@@ -210,7 +202,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _commentService.DeleteCommentAsync(id);
+                var result = await commentService.DeleteCommentAsync(id);
                 if (!result)
                 {
                     return Error<object>("Yorum silinemedi", 400);
@@ -220,7 +212,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yorum silinirken hata oluştu. ID: {CommentId}", id);
+                logger.LogError(ex, "Yorum silinirken hata oluştu. ID: {CommentId}", id);
                 return Error<object>("Yorum silinirken hata oluştu", 500);
             }
         }
@@ -236,7 +228,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _commentService.RestoreCommentAsync(id);
+                var result = await commentService.RestoreCommentAsync(id);
                 if (!result)
                 {
                     return Error<object>("Yorum geri yüklenemedi", 400);
@@ -246,7 +238,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yorum geri yüklenirken hata oluştu. ID: {CommentId}", id);
+                logger.LogError(ex, "Yorum geri yüklenirken hata oluştu. ID: {CommentId}", id);
                 return Error<object>("Yorum geri yüklenirken hata oluştu", 500);
             }
         }
@@ -263,7 +255,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _commentService.UpdateCommentStatusAsync(id, status);
+                var result = await commentService.UpdateCommentStatusAsync(id, status);
                 if (!result)
                 {
                     return Error<object>("Yorum durumu güncellenemedi", 400);
@@ -273,7 +265,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yorum durumu güncellenirken hata oluştu. ID: {CommentId}", id);
+                logger.LogError(ex, "Yorum durumu güncellenirken hata oluştu. ID: {CommentId}", id);
                 return Error<object>("Yorum durumu güncellenirken hata oluştu", 500);
             }
         }
@@ -289,7 +281,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _commentService.IncrementLikeCountAsync(id);
+                var result = await commentService.IncrementLikeCountAsync(id);
                 if (!result)
                 {
                     return Error<object>("Yorum beğenilemedi", 400);
@@ -299,9 +291,9 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Yorum beğenilirken hata oluştu. ID: {CommentId}", id);
+                logger.LogError(ex, "Yorum beğenilirken hata oluştu. ID: {CommentId}", id);
                 return Error<object>("Yorum beğenilirken hata oluştu", 500);
             }
         }
     }
-} 
+}

@@ -1,10 +1,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Newspaper.AdminPanel.Models;
-using Newspaper.AdminPanel.Services;
 using Newspaper.Dto.Mssql;
 using Maggsoft.Framework.HttpClientApi;
 using Maggsoft.Core.Base;
-using System.Text.Json;
 
 namespace Newspaper.AdminPanel.Controllers
 {

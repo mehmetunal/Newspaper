@@ -19,7 +19,7 @@ namespace Newspaper.Api.Controllers
         private readonly IHttpContextAccessor _httpContextAccessor;
 
         public FileUploadController(
-            ILogger<FileUploadController> logger, 
+            ILogger<FileUploadController> logger,
             IWebHostEnvironment environment,
             IFilesManager filesManager,
             IMaggsoftFileProvider fileProvider,
@@ -223,4 +223,4 @@ namespace Newspaper.Api.Controllers
             }
         }
     }
-} 
+}

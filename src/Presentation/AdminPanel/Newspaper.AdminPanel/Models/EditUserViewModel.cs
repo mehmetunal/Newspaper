@@ -12,5 +12,6 @@ namespace Newspaper.AdminPanel.Models
         public string FirstName { get; set; } = string.Empty;
         public string LastName { get; set; } = string.Empty;
         public string? PhoneNumber { get; set; }
+        public bool IsActive { get; set; } = true;
     }
 }

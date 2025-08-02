@@ -10,19 +10,11 @@ namespace Newspaper.Api.Controllers
     /// <summary>
     /// Makale işlemleri
     /// </summary>
-    public class ArticleController : BaseController
+    public class ArticleController(
+        IArticleService articleService,
+        ILogger<ArticleController> logger)
+        : BaseController
     {
-        private readonly IArticleService _articleService;
-        private readonly ILogger<ArticleController> _logger;
-
-        public ArticleController(
-            IArticleService articleService,
-            ILogger<ArticleController> logger)
-        {
-            _articleService = articleService;
-            _logger = logger;
-        }
-
         /// <summary>
         /// Makaleleri listeler
         /// </summary>
@@ -53,12 +45,12 @@ namespace Newspaper.Api.Controllers
                     IsPublished = isPublished
                 };
 
-                var articles = await _articleService.GetArticlesAsync(searchDto);
+                var articles = await articleService.GetArticlesAsync(searchDto);
                 return Success(articles);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makaleler listelenirken hata oluştu");
+                logger.LogError(ex, "Makaleler listelenirken hata oluştu");
                 return Error<PagedList<ArticleListDto>>("Makaleler listelenirken hata oluştu", 500);
             }
         }
@@ -74,12 +66,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var articles = await _articleService.GetFeaturedArticlesAsync(count);
+                var articles = await articleService.GetFeaturedArticlesAsync(count);
                 return Success(articles);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Öne çıkan makaleler getirilirken hata oluştu");
+                logger.LogError(ex, "Öne çıkan makaleler getirilirken hata oluştu");
                 return Error<List<ArticleListDto>>("Öne çıkan makaleler getirilirken hata oluştu", 500);
             }
         }
@@ -95,12 +87,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var articles = await _articleService.GetHomePageArticlesAsync(count);
+                var articles = await articleService.GetHomePageArticlesAsync(count);
                 return Success(articles);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Ana sayfa makaleleri getirilirken hata oluştu");
+                logger.LogError(ex, "Ana sayfa makaleleri getirilirken hata oluştu");
                 return Error<List<ArticleListDto>>("Ana sayfa makaleleri getirilirken hata oluştu", 500);
             }
         }
@@ -116,20 +108,20 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var article = await _articleService.GetArticleByIdAsync(id);
+                var article = await articleService.GetArticleByIdAsync(id);
                 if (article == null)
                 {
                     return Error<ArticleDetailDto>("Makale bulunamadı", 404);
                 }
 
                 // Görüntülenme sayısını artır
-                await _articleService.IncrementViewCountAsync(id);
+                await articleService.IncrementViewCountAsync(id);
 
                 return Success(article);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale detayı getirilirken hata oluştu. ID: {ArticleId}", id);
+                logger.LogError(ex, "Makale detayı getirilirken hata oluştu. ID: {ArticleId}", id);
                 return Error<ArticleDetailDto>("Makale detayı getirilirken hata oluştu", 500);
             }
         }
@@ -145,20 +137,20 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var article = await _articleService.GetArticleBySlugAsync(slug);
+                var article = await articleService.GetArticleBySlugAsync(slug);
                 if (article == null)
                 {
                     return Error<ArticleDetailDto>("Makale bulunamadı", 404);
                 }
 
                 // Görüntülenme sayısını artır
-                await _articleService.IncrementViewCountAsync(article.Id);
+                await articleService.IncrementViewCountAsync(article.Id);
 
                 return Success(article);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale slug ile getirilirken hata oluştu. Slug: {Slug}", slug);
+                logger.LogError(ex, "Makale slug ile getirilirken hata oluştu. Slug: {Slug}", slug);
                 return Error<ArticleDetailDto>("Makale getirilirken hata oluştu", 500);
             }
         }
@@ -181,12 +173,12 @@ namespace Newspaper.Api.Controllers
                 }
 
                 createArticleDto.AuthorId = userId.Value;
-                var article = await _articleService.CreateArticleAsync(createArticleDto);
+                var article = await articleService.CreateArticleAsync(createArticleDto);
                 return Success(article, "Makale başarıyla oluşturuldu");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale oluşturulurken hata oluştu");
+                logger.LogError(ex, "Makale oluşturulurken hata oluştu");
                 return Error<ArticleDetailDto>("Makale oluşturulurken hata oluştu", 500);
             }
         }
@@ -204,12 +196,12 @@ namespace Newspaper.Api.Controllers
             try
             {
                 updateArticleDto.Id = id;
-                var article = await _articleService.UpdateArticleAsync(updateArticleDto);
+                var article = await articleService.UpdateArticleAsync(updateArticleDto);
                 return Success(article, "Makale başarıyla güncellendi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale güncellenirken hata oluştu. ID: {ArticleId}", id);
+                logger.LogError(ex, "Makale güncellenirken hata oluştu. ID: {ArticleId}", id);
                 return Error<ArticleDetailDto>("Makale güncellenirken hata oluştu", 500);
             }
         }
@@ -225,7 +217,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _articleService.DeleteArticleAsync(id);
+                var result = await articleService.DeleteArticleAsync(id);
                 if (!result)
                 {
                     return Error<object>("Makale silinemedi", 400);
@@ -235,7 +227,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale silinirken hata oluştu. ID: {ArticleId}", id);
+                logger.LogError(ex, "Makale silinirken hata oluştu. ID: {ArticleId}", id);
                 return Error<object>("Makale silinirken hata oluştu", 500);
             }
         }
@@ -251,7 +243,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _articleService.RestoreArticleAsync(id);
+                var result = await articleService.RestoreArticleAsync(id);
                 if (!result)
                 {
                     return Error<object>("Makale geri yüklenemedi", 400);
@@ -261,7 +253,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale geri yüklenirken hata oluştu. ID: {ArticleId}", id);
+                logger.LogError(ex, "Makale geri yüklenirken hata oluştu. ID: {ArticleId}", id);
                 return Error<object>("Makale geri yüklenirken hata oluştu", 500);
             }
         }
@@ -277,7 +269,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _articleService.IncrementLikeCountAsync(id);
+                var result = await articleService.IncrementLikeCountAsync(id);
                 if (!result)
                 {
                     return Error<object>("Makale beğenilemedi", 400);
@@ -287,7 +279,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale beğenilirken hata oluştu. ID: {ArticleId}", id);
+                logger.LogError(ex, "Makale beğenilirken hata oluştu. ID: {ArticleId}", id);
                 return Error<object>("Makale beğenilirken hata oluştu", 500);
             }
         }
@@ -303,7 +295,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _articleService.IncrementShareCountAsync(id);
+                var result = await articleService.IncrementShareCountAsync(id);
                 if (!result)
                 {
                     return Error<object>("Makale paylaşılamadı", 400);
@@ -313,9 +305,9 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Makale paylaşılırken hata oluştu. ID: {ArticleId}", id);
+                logger.LogError(ex, "Makale paylaşılırken hata oluştu. ID: {ArticleId}", id);
                 return Error<object>("Makale paylaşılırken hata oluştu", 500);
             }
         }
     }
-} 
+}

@@ -4,6 +4,8 @@ using Microsoft.AspNetCore.Mvc;
 using Newspaper.AdminPanel.Models;
 using Newspaper.Dto.Mssql;
 using Maggsoft.Framework.HttpClientApi;
+using Newspaper.Dto.Mssql.Category;
+using System.Text.Json;
 
 namespace Newspaper.AdminPanel.Controllers
 {
@@ -17,25 +19,42 @@ namespace Newspaper.AdminPanel.Controllers
             _httpClient = httpClient;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
             ViewData["Title"] = "Kategori Yönetimi";
 
             try
             {
-                var response = await _httpClient.GetAsync<Result<List<CategoryDto>>>("api/category");
+                var queryParams = new Dictionary<string, string>();
+                if (!string.IsNullOrEmpty(searchTerm))
+                    queryParams.Add("searchTerm", searchTerm);
+                queryParams.Add("pageNumber", pageNumber.ToString());
+                queryParams.Add("pageSize", pageSize.ToString());
+
+                var url = "api/category";
+                if (queryParams.Any())
+                {
+                    var queryString = string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+                    url = $"{url}?{queryString}";
+                }
+
+                var response = await _httpClient.GetAsync<Result<PagedListWrapper<CategoryListDto>>>(url);
                 if (response.IsSuccess)
                 {
-                    return View(response.Data);
+                    return View(new CategoryListViewModel
+                    {
+                        Categories = response.Data ?? PagedListWrapper<CategoryListDto>.Empty(pageNumber, pageSize),
+                        SearchTerm = searchTerm
+                    });
                 }
 
                 TempData["Error"] = "Kategoriler yüklenirken hata oluştu.";
-                return View(new List<CategoryDto>());
+                return View(new CategoryListViewModel());
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Kategoriler yüklenirken hata oluştu: " + ex.Message;
-                return View(new List<CategoryDto>());
+                return View(new CategoryListViewModel());
             }
         }
 
@@ -151,7 +170,7 @@ namespace Newspaper.AdminPanel.Controllers
         {
             try
             {
-                var response = await _httpClient.DeleteAsync<Result<object>>($"api/category/{id}");
+                var response = await _httpClient.DeleteAsync($"api/category", id);
                 if (response.IsSuccess)
                 {
                     TempData["Success"] = "Kategori başarıyla silindi.";

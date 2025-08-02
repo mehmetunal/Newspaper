@@ -10,19 +10,11 @@ namespace Newspaper.Api.Controllers
     /// <summary>
     /// Kategori işlemleri
     /// </summary>
-    public class CategoriesController : BaseController
+    public class CategoriesController(
+        ICategoryService categoryService,
+        ILogger<CategoriesController> logger)
+        : BaseController
     {
-        private readonly ICategoryService _categoryService;
-        private readonly ILogger<CategoriesController> _logger;
-
-        public CategoriesController(
-            ICategoryService categoryService,
-            ILogger<CategoriesController> logger)
-        {
-            _categoryService = categoryService;
-            _logger = logger;
-        }
-
         /// <summary>
         /// Kategorileri listeler
         /// </summary>
@@ -41,12 +33,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var categories = await _categoryService.GetCategoriesAsync(page, pageSize, searchTerm, parentId);
+                var categories = await categoryService.GetCategoriesAsync(page, pageSize, searchTerm, parentId);
                 return Success(categories);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kategoriler listelenirken hata oluştu");
+                logger.LogError(ex, "Kategoriler listelenirken hata oluştu");
                 return Error<PagedList<CategoryListDto>>("Kategoriler listelenirken hata oluştu", 500);
             }
         }
@@ -61,12 +53,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var categories = await _categoryService.GetAllCategoriesAsync();
+                var categories = await categoryService.GetAllCategoriesAsync();
                 return Success(categories);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Tüm kategoriler listelenirken hata oluştu");
+                logger.LogError(ex, "Tüm kategoriler listelenirken hata oluştu");
                 return Error<List<CategoryListDto>>("Tüm kategoriler listelenirken hata oluştu", 500);
             }
         }
@@ -82,7 +74,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var category = await _categoryService.GetCategoryByIdAsync(id);
+                var category = await categoryService.GetCategoryByIdAsync(id);
                 if (category == null)
                 {
                     return Error<CategoryDetailDto>("Kategori bulunamadı", 404);
@@ -92,7 +84,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kategori detayı getirilirken hata oluştu. ID: {CategoryId}", id);
+                logger.LogError(ex, "Kategori detayı getirilirken hata oluştu. ID: {CategoryId}", id);
                 return Error<CategoryDetailDto>("Kategori detayı getirilirken hata oluştu", 500);
             }
         }
@@ -108,12 +100,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var subCategories = await _categoryService.GetSubCategoriesAsync(parentId);
+                var subCategories = await categoryService.GetSubCategoriesAsync(parentId);
                 return Success(subCategories);
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Alt kategoriler getirilirken hata oluştu. Parent ID: {ParentId}", parentId);
+                logger.LogError(ex, "Alt kategoriler getirilirken hata oluştu. Parent ID: {ParentId}", parentId);
                 return Error<List<CategoryListDto>>("Alt kategoriler getirilirken hata oluştu", 500);
             }
         }
@@ -129,12 +121,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var category = await _categoryService.CreateCategoryAsync(createCategoryDto);
+                var category = await categoryService.CreateCategoryAsync(createCategoryDto);
                 return Success(category, "Kategori başarıyla oluşturuldu");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kategori oluşturulurken hata oluştu");
+                logger.LogError(ex, "Kategori oluşturulurken hata oluştu");
                 return Error<CategoryDetailDto>("Kategori oluşturulurken hata oluştu", 500);
             }
         }
@@ -152,12 +144,12 @@ namespace Newspaper.Api.Controllers
             try
             {
                 updateCategoryDto.Id = id;
-                var category = await _categoryService.UpdateCategoryAsync(updateCategoryDto);
+                var category = await categoryService.UpdateCategoryAsync(updateCategoryDto);
                 return Success(category, "Kategori başarıyla güncellendi");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kategori güncellenirken hata oluştu. ID: {CategoryId}", id);
+                logger.LogError(ex, "Kategori güncellenirken hata oluştu. ID: {CategoryId}", id);
                 return Error<CategoryDetailDto>("Kategori güncellenirken hata oluştu", 500);
             }
         }
@@ -173,7 +165,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _categoryService.DeleteCategoryAsync(id);
+                var result = await categoryService.DeleteCategoryAsync(id);
                 if (!result)
                 {
                     return Error<object>("Kategori silinemedi", 400);
@@ -183,7 +175,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kategori silinirken hata oluştu. ID: {CategoryId}", id);
+                logger.LogError(ex, "Kategori silinirken hata oluştu. ID: {CategoryId}", id);
                 return Error<object>("Kategori silinirken hata oluştu", 500);
             }
         }
@@ -199,7 +191,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var result = await _categoryService.RestoreCategoryAsync(id);
+                var result = await categoryService.RestoreCategoryAsync(id);
                 if (!result)
                 {
                     return Error<object>("Kategori geri yüklenemedi", 400);
@@ -209,7 +201,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kategori geri yüklenirken hata oluştu. ID: {CategoryId}", id);
+                logger.LogError(ex, "Kategori geri yüklenirken hata oluştu. ID: {CategoryId}", id);
                 return Error<object>("Kategori geri yüklenirken hata oluştu", 500);
             }
         }

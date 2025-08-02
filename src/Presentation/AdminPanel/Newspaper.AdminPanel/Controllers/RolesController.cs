@@ -148,7 +148,7 @@ namespace Newspaper.AdminPanel.Controllers
         {
             try
             {
-                var response = await _httpClient.DeleteAsync<Result<object>>($"api/role/{id}");
+                var response = await _httpClient.DeleteAsync("api/role", id);
                 if (response.IsSuccess)
                 {
                     TempData["Success"] = "Rol başarıyla silindi.";

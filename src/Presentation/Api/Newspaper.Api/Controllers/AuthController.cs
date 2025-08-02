@@ -12,25 +12,13 @@ namespace Newspaper.Api.Controllers
     /// <summary>
     /// Kimlik doğrulama işlemleri
     /// </summary>
-    public class AuthController : BaseController
+    public class AuthController(
+        UserManager<User> userManager,
+        SignInManager<User> signInManager,
+        IUserService userService,
+        ILogger<AuthController> logger)
+        : BaseController
     {
-        private readonly UserManager<User> _userManager;
-        private readonly SignInManager<User> _signInManager;
-        private readonly IUserService _userService;
-        private readonly ILogger<AuthController> _logger;
-
-        public AuthController(
-            UserManager<User> userManager,
-            SignInManager<User> signInManager,
-            IUserService userService,
-            ILogger<AuthController> logger)
-        {
-            _userManager = userManager;
-            _signInManager = signInManager;
-            _userService = userService;
-            _logger = logger;
-        }
-
         /// <summary>
         /// Kullanıcı girişi
         /// </summary>
@@ -42,13 +30,13 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var user = await _userManager.FindByEmailAsync(loginDto.Email);
+                var user = await userManager.FindByEmailAsync(loginDto.Email);
                 if (user == null)
                 {
                     return Error<LoginResponseDto>("Geçersiz email veya şifre", 401);
                 }
 
-                var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
+                var result = await signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
                 if (!result.Succeeded)
                 {
                     return Error<LoginResponseDto>("Geçersiz email veya şifre", 401);
@@ -56,10 +44,10 @@ namespace Newspaper.Api.Controllers
 
                 // Son giriş tarihini güncelle
                 user.LastLoginDate = DateTime.UtcNow;
-                await _userManager.UpdateAsync(user);
+                await userManager.UpdateAsync(user);
 
                 // Kullanıcı bilgilerini al
-                var roles = await _userManager.GetRolesAsync(user);
+                var roles = await userManager.GetRolesAsync(user);
 
                 var response = new LoginResponseDto
                 {
@@ -76,12 +64,12 @@ namespace Newspaper.Api.Controllers
                     }
                 };
 
-                _logger.LogInformation("Kullanıcı giriş yaptı: {Email}", loginDto.Email);
+                logger.LogInformation("Kullanıcı giriş yaptı: {Email}", loginDto.Email);
                 return Success(response, "Giriş başarılı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Giriş işlemi sırasında hata oluştu");
+                logger.LogError(ex, "Giriş işlemi sırasında hata oluştu");
                 return Error<LoginResponseDto>("Giriş işlemi sırasında hata oluştu", 500);
             }
         }
@@ -97,7 +85,7 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                var existingUser = await _userManager.FindByEmailAsync(registerDto.Email);
+                var existingUser = await userManager.FindByEmailAsync(registerDto.Email);
                 if (existingUser != null)
                 {
                     return Error<UserDetailDto>("Bu email adresi zaten kullanılıyor");
@@ -112,7 +100,7 @@ namespace Newspaper.Api.Controllers
                     EmailConfirmed = true // Email onayı otomatik
                 };
 
-                var result = await _userManager.CreateAsync(user, registerDto.Password);
+                var result = await userManager.CreateAsync(user, registerDto.Password);
                 if (!result.Succeeded)
                 {
                     var errors = result.Errors.Select(e => e.Description);
@@ -120,7 +108,7 @@ namespace Newspaper.Api.Controllers
                 }
 
                 // Varsayılan olarak User rolü ata
-                await _userManager.AddToRoleAsync(user, "User");
+                await userManager.AddToRoleAsync(user, "User");
 
                 var userDetail = new UserDetailDto
                 {
@@ -134,12 +122,12 @@ namespace Newspaper.Api.Controllers
                     Biography = user.Biography
                 };
 
-                _logger.LogInformation("Yeni kullanıcı kaydı: {Email}", registerDto.Email);
+                logger.LogInformation("Yeni kullanıcı kaydı: {Email}", registerDto.Email);
                 return Success(userDetail, "Kayıt başarılı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kayıt işlemi sırasında hata oluştu");
+                logger.LogError(ex, "Kayıt işlemi sırasında hata oluştu");
                 return Error<UserDetailDto>("Kayıt işlemi sırasında hata oluştu", 500);
             }
         }
@@ -154,12 +142,12 @@ namespace Newspaper.Api.Controllers
         {
             try
             {
-                await _signInManager.SignOutAsync();
+                await signInManager.SignOutAsync();
                 return Success<object>(null, "Çıkış başarılı");
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Çıkış işlemi sırasında hata oluştu");
+                logger.LogError(ex, "Çıkış işlemi sırasında hata oluştu");
                 return Error<object>("Çıkış işlemi sırasında hata oluştu", 500);
             }
         }
@@ -180,7 +168,7 @@ namespace Newspaper.Api.Controllers
                     return Error<UserDetailDto>("Kullanıcı bilgisi bulunamadı", 401);
                 }
 
-                var user = await _userService.GetUserByIdAsync(userId.Value);
+                var user = await userService.GetUserByIdAsync(userId.Value);
                 if (user == null)
                 {
                     return Error<UserDetailDto>("Kullanıcı bulunamadı", 404);
@@ -190,7 +178,7 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Kullanıcı bilgileri getirilirken hata oluştu");
+                logger.LogError(ex, "Kullanıcı bilgileri getirilirken hata oluştu");
                 return Error<UserDetailDto>("Kullanıcı bilgileri getirilirken hata oluştu", 500);
             }
         }
@@ -212,7 +200,7 @@ namespace Newspaper.Api.Controllers
                     return Error<object>("Kullanıcı bilgisi bulunamadı", 401);
                 }
 
-                var result = await _userService.ChangePasswordAsync(changePasswordDto);
+                var result = await userService.ChangePasswordAsync(changePasswordDto);
                 if (!result)
                 {
                     return Error<object>("Şifre değiştirme işlemi başarısız");
@@ -222,10 +210,10 @@ namespace Newspaper.Api.Controllers
             }
             catch (Exception ex)
             {
-                _logger.LogError(ex, "Şifre değiştirme işlemi sırasında hata oluştu");
+                logger.LogError(ex, "Şifre değiştirme işlemi sırasında hata oluştu");
                 return Error<object>("Şifre değiştirme işlemi sırasında hata oluştu", 500);
             }
         }
 
     }
-} 
+}

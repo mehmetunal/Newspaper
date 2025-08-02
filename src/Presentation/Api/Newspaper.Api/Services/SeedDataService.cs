@@ -55,49 +55,40 @@ namespace Newspaper.Api.Services
             {
                 using var scope = _serviceProvider.CreateScope();
                 var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<Role>>();
-                var context = scope.ServiceProvider.GetRequiredService<NewspaperDbContext>();
-
-                if (!context.Roles.Any())
+                var roles = new[]
                 {
-                    var roles = new[]
-                    {
-                        new { Name = "SuperAdmin", Description = "Sistemin tam kontrolüne sahip en üst seviye rol" },
-                        new { Name = "Admin", Description = "Genel sistem yönetimi ve içerik kontrolü" },
-                        new { Name = "Editor", Description = "İçerik yönetimi ve yayınlama" },
-                        new { Name = "Author", Description = "Makale yazma ve kendi içeriklerini yönetme" },
-                        new { Name = "Moderator", Description = "Yorum moderasyonu ve kullanıcı yönetimi" },
-                        new { Name = "Viewer", Description = "Sadece içerik görüntüleme" }
-                    };
-                    
-                    var createdRoles = 0;
+                    new { Name = "SuperAdmin", Description = "Sistemin tam kontrolüne sahip en üst seviye rol" },
+                    new { Name = "Admin", Description = "Genel sistem yönetimi ve içerik kontrolü" },
+                    new { Name = "Editor", Description = "İçerik yönetimi ve yayınlama" },
+                    new { Name = "Author", Description = "Makale yazma ve kendi içeriklerini yönetme" },
+                    new { Name = "Moderator", Description = "Yorum moderasyonu ve kullanıcı yönetimi" },
+                    new { Name = "Viewer", Description = "Sadece içerik görüntüleme" }
+                };
 
-                    foreach (var role in roles)
+                var createdRoles = 0;
+
+                foreach (var role in roles)
+                {
+                    if (!await roleManager.RoleExistsAsync(role.Name))
                     {
-                        if (!await roleManager.RoleExistsAsync(role.Name))
+                        var newRole = new Role(role.Name)
                         {
-                            var newRole = new Role(role.Name)
-                            {
-                                Description = role.Description,
-                                IsActive = true
-                            };
-                            await roleManager.CreateAsync(newRole);
-                            createdRoles++;
-                            _logger.LogInformation($"Rol oluşturuldu: {role.Name} - {role.Description}");
-                        }
+                            Description = role.Description,
+                            IsActive = true
+                        };
+                        await roleManager.CreateAsync(newRole);
+                        createdRoles++;
+                        _logger.LogInformation($"Rol oluşturuldu: {role.Name} - {role.Description}");
                     }
+                }
 
-                    if (createdRoles > 0)
-                    {
-                        _logger.LogInformation($"{createdRoles} yeni rol oluşturuldu.");
-                    }
-                    else
-                    {
-                        _logger.LogInformation("Tüm roller zaten mevcut.");
-                    }
+                if (createdRoles > 0)
+                {
+                    _logger.LogInformation($"{createdRoles} yeni rol oluşturuldu.");
                 }
                 else
                 {
-                    _logger.LogInformation("Roller zaten mevcut.");
+                    _logger.LogInformation("Tüm roller zaten mevcut.");
                 }
             }
             catch (Exception ex)
@@ -116,7 +107,6 @@ namespace Newspaper.Api.Services
             {
                 using var scope = _serviceProvider.CreateScope();
                 var userManager = scope.ServiceProvider.GetRequiredService<UserManager<User>>();
-                var context = scope.ServiceProvider.GetRequiredService<NewspaperDbContext>();
 
                 // Varsayılan kullanıcıları oluştur
                 var defaultUsers = new[]

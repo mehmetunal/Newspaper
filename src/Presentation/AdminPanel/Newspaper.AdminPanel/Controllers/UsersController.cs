@@ -18,25 +18,42 @@ namespace Newspaper.AdminPanel.Controllers
             _httpClient = httpClient;
         }
 
-        public async Task<IActionResult> Index()
+        public async Task<IActionResult> Index(string searchTerm = "", int pageNumber = 1, int pageSize = 10)
         {
             ViewData["Title"] = "Kullanıcı Yönetimi";
 
             try
             {
-                var response = await _httpClient.GetAsync<Result<List<UserListDto>>>("api/user");
+                var queryParams = new Dictionary<string, string>();
+                if (!string.IsNullOrEmpty(searchTerm))
+                    queryParams.Add("searchTerm", searchTerm);
+                queryParams.Add("pageNumber", pageNumber.ToString());
+                queryParams.Add("pageSize", pageSize.ToString());
+
+                var url = "api/user";
+                if (queryParams.Any())
+                {
+                    var queryString = string.Join("&", queryParams.Select(kvp => $"{kvp.Key}={kvp.Value}"));
+                    url = $"{url}?{queryString}";
+                }
+
+                var response = await _httpClient.GetAsync<Result<PagedListWrapper<UserListDto>>>(url);
                 if (response.IsSuccess)
                 {
-                    return View(response.Data);
+                    return View(new UserListViewModel
+                    {
+                        Users = response.Data ?? PagedListWrapper<UserListDto>.Empty(pageNumber, pageSize),
+                        SearchTerm = searchTerm
+                    });
                 }
 
                 TempData["Error"] = "Kullanıcılar yüklenirken hata oluştu.";
-                return View(new List<UserListDto>());
+                return View(new UserListViewModel());
             }
             catch (Exception ex)
             {
                 TempData["Error"] = "Kullanıcılar yüklenirken hata oluştu: " + ex.Message;
-                return View(new List<UserListDto>());
+                return View(new UserListViewModel());
             }
         }
 
@@ -177,7 +194,7 @@ namespace Newspaper.AdminPanel.Controllers
         {
             try
             {
-                var response = await _httpClient.DeleteAsync<Result<object>>($"api/user/{id}");
+                var response = await _httpClient.DeleteAsync("api/user", id);
                 if (response.IsSuccess)
                 {
                     TempData["Success"] = "Kullanıcı başarıyla silindi.";

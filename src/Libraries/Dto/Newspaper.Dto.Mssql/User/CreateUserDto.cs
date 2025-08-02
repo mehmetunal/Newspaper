@@ -35,6 +35,8 @@ namespace Newspaper.Dto.Mssql
 
         public DateTime? BirthDate { get; set; }
         public int Gender { get; set; } = 0;
+        public string? PhoneNumber { get; set; }
+        public bool IsActive { get; set; } = true;
         public List<string> Roles { get; set; } = new List<string>();
     }
 } 
