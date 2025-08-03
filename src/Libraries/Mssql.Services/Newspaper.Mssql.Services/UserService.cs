@@ -34,6 +34,23 @@ namespace Newspaper.Mssql.Services
         }
 
         /// <summary>
+        /// Toplam kullanıcı sayısını getirir
+        /// </summary>
+        /// <returns>Toplam kullanıcı sayısı</returns>
+        public async Task<int> GetUserCountAsync()
+        {
+            try
+            {
+                return await _userManager.Users.CountAsync();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Kullanıcı sayısı alınırken hata oluştu");
+                throw;
+            }
+        }
+
+        /// <summary>
         /// Kullanıcıları sayfalı olarak getirir
         /// </summary>
         /// <param name="page">Sayfa numarası</param>

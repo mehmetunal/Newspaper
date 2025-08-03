@@ -207,34 +207,6 @@ docker:
 # - object kullanımı yerine tip güvenliği sağlanır
 # - API'den dönen response tipi belirtilir (UserDetailDto, CategoryDetailDto, ArticleDetailDto, vb.)
 
-# Admin Panel Rol Yetkilendirme Kuralları:
-# - Admin Panel'e giriş yapabilmek için kullanıcının "SuperAdmin", "Admin", "Editor", "Author", "Moderator" rollerinden birine sahip olması gerekir
-# - Rol hiyerarşisi: SuperAdmin > Admin > Editor > Author > Moderator > Viewer
-# - Login işleminde kullanıcının rolü kontrol edilir, yetkili rol yoksa giriş reddedilir
-# - Tüm Admin Panel sayfaları [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")] attribute'u ile korunur
-# - Controller seviyesinde rol bazlı yetkilendirme kullanılır:
-#   * Dashboard: [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")]
-#   * Users: [Authorize(Roles = "SuperAdmin,Admin,Moderator")]
-#   * Roles: [Authorize(Roles = "SuperAdmin,Admin")]
-#   * Categories: [Authorize(Roles = "SuperAdmin,Admin,Editor")]
-#   * Articles: [Authorize(Roles = "SuperAdmin,Admin,Editor,Author")]
-#   * Tags: [Authorize(Roles = "SuperAdmin,Admin,Editor")]
-#   * Comments: [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")]
-#   * Reports: [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")]
-#   * Settings: [Authorize(Roles = "SuperAdmin,Admin")]
-#   * Logs: [Authorize(Roles = "SuperAdmin,Admin")]
-# - Action seviyesinde özel yetkiler için [Authorize(Roles = "SuperAdmin")] kullanılır
-# - View seviyesinde @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin")) ile rol kontrolü yapılır
-# - Login başarılı olduğunda kullanıcının rolü Claims'e eklenir
-# - API'den gelen kullanıcı bilgilerinde RoleName property'si kontrol edilir
-# - Yetkisiz kullanıcılar Admin Panel'e erişemez ve login sayfasına yönlendirilir
-# - Varsayılan kullanıcılar:
-#   * SuperAdmin: admin@gmail.com (Super123!)
-#   * Admin: manager@newspaper.com (Manager123!)
-#   * Editor: editor@newspaper.com (Editor123!)
-#   * Author: author@newspaper.com (Author123!)
-#   * Moderator: moderator@newspaper.com (Moderator123!)
-
 # Maggsoft IoC Servis Kuralları:
 # - Tüm Database servislerinin interface'leri Maggsoft.Core.IoC.IService'den türemelidir
 # - Program.cs'de builder.Services.RegisterAll<IService>(); şeklinde tüm servisler register edilir

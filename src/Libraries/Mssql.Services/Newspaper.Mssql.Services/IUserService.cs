@@ -11,6 +11,12 @@ namespace Newspaper.Mssql.Services
     public interface IUserService : IService
     {
         /// <summary>
+        /// Toplam kullanıcı sayısını getirir
+        /// </summary>
+        /// <returns>Toplam kullanıcı sayısı</returns>
+        Task<int> GetUserCountAsync();
+
+        /// <summary>
         /// Kullanıcı listesini getirir
         /// </summary>
         /// <param name="page">Sayfa numarası</param>

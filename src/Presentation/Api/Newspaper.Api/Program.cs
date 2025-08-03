@@ -13,14 +13,21 @@ using Newspaper.IdentityManager;
 using Newspaper.Api.Services;
 using Maggsoft.Framework.Middleware;
 using System.Reflection;
+using System.Text.Json;
+using Maggsoft.Core.Base;
+using Maggsoft.Core.Exceptions;
+using Maggsoft.Core.Extensions;
 using Maggsoft.Core.IO;
 using Microsoft.Extensions.FileProviders;
 using Maggsoft.Mssql.Repository;
 using Maggsoft.Mssql.Extensions;
 using Maggsoft.Services.Extensions;
 using Maggsoft.Core.IoC;
+using Maggsoft.Core.Model;
+using Maggsoft.Framework.Exceptions;
 using Maggsoft.Framework.Extensions;
 using Maggsoft.Framework.Middleware.ApiResponseMiddleware;
+using Microsoft.AspNetCore.Diagnostics;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -65,6 +72,7 @@ builder.Services
 
 builder.Services.AddAutoMapperConfig(p => p.AddProfile<AutoMapperProfile>(), typeof(Program));
 
+
 // Identity konfigürasyonu
 builder.Services.AddIdentity<User, Role>(options =>
 {
@@ -73,12 +81,19 @@ builder.Services.AddIdentity<User, Role>(options =>
     options.Password.RequireUppercase = true;
     options.Password.RequireNonAlphanumeric = false;
     options.Password.RequiredLength = 6;
+    options.Tokens.EmailConfirmationTokenProvider = TokenOptions.DefaultProvider;
+    options.Tokens.PasswordResetTokenProvider = TokenOptions.DefaultProvider;
+
 })
 .AddEntityFrameworkStores<NewspaperDbContext>()
 .AddClaimsPrincipalFactory<CustomClaimsPrincipalFactory>()
 .AddErrorDescriber<CustomIdentityErrorDescriber>()
 .AddDefaultTokenProviders()
-.AddRoleManager<RoleManager<Role>>();
+.AddRoleManager<RoleManager<Role>>()
+.AddApiEndpoints();
+
+// Authentication konfigürasyonu - Sadece Identity kullanılıyor
+builder.Services.AddAuthentication().AddBearerToken(IdentityConstants.BearerScheme);
 
 // Token süresi konfigürasyonu - 1 gün
 builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
@@ -148,7 +163,7 @@ if (app.Environment.IsDevelopment())
 
 // Maggsoft Framework Middleware'leri
 app.UseMiddleware<ApiResponseMiddleware>();
-app.UseMiddleware<IPFilterMiddleware>();
+//app.UseMiddleware<IPFilterMiddleware>();
 
 app.UseHttpsRedirection();
 
@@ -206,7 +221,8 @@ app.MapGet("/api/tables", async (NewspaperDbContext context) =>
 
         var tableNames = await context.Database.SqlQueryRaw<string>(sql).ToListAsync();
 
-        return Results.Ok(new {
+        return Results.Ok(new
+        {
             message = $"Veritabanında {tableNames.Count} tablo bulundu",
             tables = tableNames,
             expectedCount = 14
@@ -234,7 +250,8 @@ app.MapGet("/api/tables/{tableName}/columns", async (NewspaperDbContext context,
 
         var columns = await context.Database.SqlQueryRaw<dynamic>(sql, new[] { new Microsoft.Data.SqlClient.SqlParameter("@tableName", tableName) }).ToListAsync();
 
-        return Results.Ok(new {
+        return Results.Ok(new
+        {
             message = $"{tableName} tablosunda {columns.Count} kolon bulundu",
             tableName = tableName,
             columns = columns
@@ -262,7 +279,8 @@ app.MapGet("/api/columns/{tableName}", async (NewspaperDbContext context, string
 
         var columns = await context.Database.SqlQueryRaw<string>(sql).ToListAsync();
 
-        return Results.Ok(new {
+        return Results.Ok(new
+        {
             message = $"{tableName} tablosunda {columns.Count} kolon bulundu",
             tableName = tableName,
             columns = columns

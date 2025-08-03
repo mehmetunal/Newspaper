@@ -10,13 +10,32 @@ using Microsoft.AspNetCore.Authorization;
 namespace Newspaper.Api.Controllers
 {
     [ApiController]
-    [Route("api/[controller]")]
     [Authorize]
+    [Route("api/[controller]")]
     public class UserController(
         IUserService userService,
         ILogger<UserController> logger)
         : BaseController
     {
+        /// <summary>
+        /// Toplam kullanıcı sayısını getirir
+        /// </summary>
+        [HttpGet("count")]
+        [Authorize(Roles = "SuperAdmin,Admin,Moderator")]
+        public async Task<ActionResult<Result<object>>> GetUserCount()
+        {
+            try
+            {
+                var count = await userService.GetUserCountAsync();
+                return Ok(Result<object>.Success(count));
+            }
+            catch (Exception ex)
+            {
+                logger.LogError(ex, "Kullanıcı sayısı alınırken hata oluştu");
+                return StatusCode(500, Result<object>.Failure(new Error("500", "Kullanıcı sayısı alınırken hata oluştu")));
+            }
+        }
+
         /// <summary>
         /// Kullanıcıları listeler (sayfalama ile)
         /// </summary>

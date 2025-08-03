@@ -49,8 +49,8 @@ namespace Newspaper.Api.Controllers
                 // Kullanıcı bilgilerini al
                 var roles = await userManager.GetRolesAsync(user);
 
-                // Bearer Token oluştur
-                var token = await userManager.GenerateUserTokenAsync(user, "Default", "BearerToken");
+                // Bearer Token oluştur - Default token provider kullanılıyor
+                var token = await userManager.GenerateUserTokenAsync(user, TokenOptions.DefaultProvider, "BearerToken");
 
                 var response = new LoginResponseDto
                 {

@@ -24,16 +24,26 @@ builder.Services.AddAuthentication(CookieAuthenticationDefaults.AuthenticationSc
     {
         opt.LoginPath = "/Users/Login";
         opt.AccessDeniedPath = "/Users/Login";
-        opt.ExpireTimeSpan = TimeSpan.FromDays(1);
+        opt.ExpireTimeSpan = TimeSpan.FromDays(1); // Set your desired expiration time
         opt.Cookie.HttpOnly = true;
         opt.Cookie.IsEssential = true;
         opt.SlidingExpiration = true;
+        opt.Events.OnSignedIn = context =>
+        {
+            //@TODO:buras� incelenecek
+            //https://stackoverflow.com/questions/54202190/get-authenticationproperties-in-current-httprequest-after-httpcontext-signinasyn
+            var httpContext = context.HttpContext;
+            httpContext.Items["Properties"] = context.Properties;
+            httpContext.Features.Set(context.Properties);
+            return Task.CompletedTask;
+        };
     });
 
 builder.Services.AddAuthorization();
 
 // HTTP Client for API calls
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IMaggsoftHttpClient, CustomHttpClient>();
 
 // Memory Cache

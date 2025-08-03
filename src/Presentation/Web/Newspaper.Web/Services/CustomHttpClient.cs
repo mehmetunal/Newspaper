@@ -4,6 +4,7 @@ using Maggsoft.Core.Base;
 using Maggsoft.Core.Model;
 using Maggsoft.Framework.HttpClientApi;
 using Newspaper.Web.Models;
+using Microsoft.AspNetCore.Http;
 
 namespace Newspaper.Web.Services
 {
@@ -16,12 +17,14 @@ namespace Newspaper.Web.Services
     private readonly HttpClient _httpClient;
     private readonly IConfiguration _configuration;
     private readonly ILogger<CustomHttpClient> _logger;
+    private readonly IHttpContextAccessor _httpContextAccessor;
 
-    public CustomHttpClient(HttpClient httpClient, IConfiguration configuration, ILogger<CustomHttpClient> logger)
+    public CustomHttpClient(HttpClient httpClient, IConfiguration configuration, ILogger<CustomHttpClient> logger, IHttpContextAccessor httpContextAccessor)
     {
         _httpClient = httpClient;
         _configuration = configuration;
         _logger = logger;
+        _httpContextAccessor = httpContextAccessor;
 
         // Configure base address
         var apiBaseUrl = _configuration["ApiBaseUrl"] ?? "http://localhost:5125/";
@@ -29,8 +32,31 @@ namespace Newspaper.Web.Services
         _httpClient.DefaultRequestHeaders.Add("Accept", "application/json");
     }
 
+    /// <summary>
+    /// Token'ı claims'den alır ve Bearer header'ı ekler
+    /// </summary>
+    private void AddAuthorizationHeader()
+    {
+        try
+        {
+            var token = _httpContextAccessor.HttpContext?.User?.FindFirst("Token")?.Value;
+            if (!string.IsNullOrEmpty(token))
+            {
+                // Mevcut Authorization header'ını temizle
+                _httpClient.DefaultRequestHeaders.Remove("Authorization");
+                // Yeni Bearer token header'ı ekle
+                _httpClient.DefaultRequestHeaders.Add("Authorization", $"Bearer {token}");
+            }
+        }
+        catch (Exception ex)
+        {
+            _logger.LogWarning(ex, "Token header eklenirken hata oluştu");
+        }
+    }
+
     public async Task PingAsync()
     {
+        AddAuthorizationHeader();
         await _httpClient.GetStringAsync("/");
     }
 
@@ -38,6 +64,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
@@ -72,6 +99,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var response = await _httpClient.GetAsync(url);
             response.EnsureSuccessStatusCode();
             var responseBody = await response.Content.ReadAsStringAsync();
@@ -90,10 +118,7 @@ namespace Newspaper.Web.Services
                 return resultData;
             }
 
-
-
             var result = JsonSerializer.Deserialize<TResult>(responseBody, jsonOptions);
-
             return result;
         }
         catch (Exception ex)
@@ -105,6 +130,7 @@ namespace Newspaper.Web.Services
 
     public async Task<HttpResponseMessage> GetClientAsync(string url, Dictionary<string, string>? qParametre = null)
     {
+        AddAuthorizationHeader();
         if (qParametre != null && qParametre.Any())
         {
             var queryString = string.Join("&", qParametre.Select(kvp => $"{kvp.Key}={kvp.Value}"));
@@ -118,6 +144,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var json = JsonSerializer.Serialize(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -142,6 +169,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var json = JsonSerializer.Serialize(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -166,6 +194,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var json = JsonSerializer.Serialize(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -192,6 +221,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var json = JsonSerializer.Serialize(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -209,6 +239,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var response = await _httpClient.PostAsync(url, content);
             var responseBody = await response.Content.ReadAsStringAsync();
 
@@ -230,6 +261,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var json = JsonSerializer.Serialize(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -254,6 +286,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var json = JsonSerializer.Serialize(body);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
@@ -278,6 +311,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var response = await _httpClient.PutAsync(url, content);
             var responseBody = await response.Content.ReadAsStringAsync();
 
@@ -299,6 +333,7 @@ namespace Newspaper.Web.Services
     {
         try
         {
+            AddAuthorizationHeader();
             var response = await _httpClient.DeleteAsync($"{url}/{id}");
             var responseBody = await response.Content.ReadAsStringAsync();
 

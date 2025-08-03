@@ -34,6 +34,7 @@ builder.Services.AddAuthorization();
 
 // HTTP Client for API calls
 builder.Services.AddHttpClient();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<IMaggsoftHttpClient, CustomHttpClient>();
 
 // Memory Cache
