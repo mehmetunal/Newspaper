@@ -88,8 +88,6 @@ namespace Newspaper.AdminPanel.Services
                 return resultData;
             }
 
-
-
             var result = JsonSerializer.Deserialize<TResult>(responseBody, jsonOptions);
 
             return result;

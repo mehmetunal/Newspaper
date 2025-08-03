@@ -238,7 +238,7 @@ namespace Newspaper.AdminPanel.Controllers
                     };
 
                     var response = await _httpClient.PostAsync<LoginResponseDto>("api/auth/login", loginDto);
-                    if (response.IsSuccess)
+                    if (response?.IsSuccess == true && response.Data != null)
                     {
                         // Cookie authentication yapılıyor
                         var claims = new List<Claim>
@@ -246,7 +246,8 @@ namespace Newspaper.AdminPanel.Controllers
                             new Claim(ClaimTypes.Name, response.Data.Email),
                             new Claim(ClaimTypes.Email, response.Data.Email),
                             new Claim(ClaimTypes.NameIdentifier, response.Data.UserId.ToString()),
-                            new Claim(ClaimTypes.Role, response.Data.RoleName)
+                            new Claim(ClaimTypes.Role, response.Data.RoleName),
+                            new Claim("Token", response.Data.Token) // Token'ı claim'e ekle
                         };
 
                         var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
@@ -265,7 +266,7 @@ namespace Newspaper.AdminPanel.Controllers
                         return RedirectToAction("Index", "Dashboard");
                     }
 
-                    TempData["Error"] = response.Message ?? "Giriş başarısız.";
+                    TempData["Error"] = response?.Message ?? "Giriş başarısız.";
                 }
                 catch (Exception ex)
                 {

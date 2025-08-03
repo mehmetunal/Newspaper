@@ -1,9 +1,8 @@
+
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.OpenApi.Models;
-using FluentMigrator.Runner;
 using FluentValidation;
-
 using Serilog;
 using Serilog.Events;
 using Serilog.Sinks.MSSqlServer;
@@ -20,6 +19,8 @@ using Maggsoft.Mssql.Repository;
 using Maggsoft.Mssql.Extensions;
 using Maggsoft.Services.Extensions;
 using Maggsoft.Core.IoC;
+using Maggsoft.Framework.Extensions;
+using Maggsoft.Framework.Middleware.ApiResponseMiddleware;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -46,9 +47,9 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen(c =>
 {
-    c.SwaggerDoc("v1", new OpenApiInfo 
-    { 
-        Title = "Newspaper API", 
+    c.SwaggerDoc("v1", new OpenApiInfo
+    {
+        Title = "Newspaper API",
         Version = "v1",
         Description = "Newspaper yönetim sistemi API'si"
     });
@@ -126,6 +127,9 @@ builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 // Memory Cache
 builder.Services.AddMemoryCache();
 
+// Maggsoft Global Response Middleware
+builder.Services.AddGlobalResponseMiddlewareWithOptions(p => p.IgnoreAcceptHeader = ["image/", "txt"]);
+
 var app = builder.Build();
 
 // Configure the HTTP request pipeline.
@@ -139,11 +143,11 @@ if (app.Environment.IsDevelopment())
     });
 }
 
-app.UseHttpsRedirection();
-
 // Maggsoft Framework Middleware'leri
 app.UseMiddleware<ApiResponseMiddleware>();
 app.UseMiddleware<IPFilterMiddleware>();
+
+app.UseHttpsRedirection();
 
 // CORS middleware
 app.UseCors("AllowAll");
