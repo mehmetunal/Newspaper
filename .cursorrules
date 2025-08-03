@@ -229,7 +229,7 @@ docker:
 # - API'den gelen kullanıcı bilgilerinde RoleName property'si kontrol edilir
 # - Yetkisiz kullanıcılar Admin Panel'e erişemez ve login sayfasına yönlendirilir
 # - Varsayılan kullanıcılar:
-#   * SuperAdmin: admin@newspaper.com (Super123!)
+#   * SuperAdmin: admin@gmail.com (Super123!)
 #   * Admin: manager@newspaper.com (Manager123!)
 #   * Editor: editor@newspaper.com (Editor123!)
 #   * Author: author@newspaper.com (Author123!)

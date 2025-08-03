@@ -4,9 +4,11 @@ using Newspaper.AdminPanel.Models;
 using Newspaper.Dto.Mssql;
 using Maggsoft.Framework.HttpClientApi;
 using Maggsoft.Core.Base;
+using Microsoft.AspNetCore.Authorization;
 
 namespace Newspaper.AdminPanel.Controllers
 {
+    [Authorize(Roles = "SuperAdmin,Admin,Editor,Author,Moderator")]
     public class HomeController : Controller
     {
         private readonly IMaggsoftHttpClient _httpClient;

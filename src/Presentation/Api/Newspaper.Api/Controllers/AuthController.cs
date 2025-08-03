@@ -51,17 +51,12 @@ namespace Newspaper.Api.Controllers
 
                 var response = new LoginResponseDto
                 {
-                    User = new UserDetailDto
-                    {
-                        Id = user.Id,
-                        FirstName = user.FirstName,
-                        LastName = user.LastName,
-                        Email = user.Email!,
-                        UserName = user.UserName!,
-                        RoleName = roles.FirstOrDefault() ?? "",
-                        ProfileImageUrl = user.ProfileImageUrl,
-                        Biography = user.Biography
-                    }
+                    Token = "JWT_TOKEN_HERE", // TODO: JWT token oluşturulacak
+                    UserId = user.Id,
+                    Email = user.Email!,
+                    UserName = user.UserName!,
+                    RoleName = roles.FirstOrDefault() ?? "",
+                    ExpiresAt = DateTime.UtcNow.AddDays(1)
                 };
 
                 logger.LogInformation("Kullanıcı giriş yaptı: {Email}", loginDto.Email);

@@ -111,7 +111,7 @@ namespace Newspaper.Api.Services
                 // Varsayılan kullanıcıları oluştur
                 var defaultUsers = new[]
                 {
-                    new { Email = "admin@newspaper.com", Password = "Super123!", FirstName = "Super", LastName = "Admin", Role = "SuperAdmin" },
+                    new { Email = "admin@gmail.com", Password = "Super123!", FirstName = "Super", LastName = "Admin", Role = "SuperAdmin" },
                     new { Email = "manager@newspaper.com", Password = "Manager123!", FirstName = "Site", LastName = "Manager", Role = "Admin" },
                     new { Email = "editor@newspaper.com", Password = "Editor123!", FirstName = "Content", LastName = "Editor", Role = "Editor" },
                     new { Email = "author@newspaper.com", Password = "Author123!", FirstName = "Content", LastName = "Author", Role = "Author" },

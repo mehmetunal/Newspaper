@@ -241,7 +241,7 @@ if (userRoles.includes('SuperAdmin') || userRoles.includes('Admin')) {
 ## **Varsayılan Roller ve Kullanıcılar**
 
 ### **Seed Data**
-- **SuperAdmin**: admin@newspaper.com (Super123!)
+- **SuperAdmin**: admin@gmail.com (Super123!)
 - **Admin**: manager@newspaper.com (Manager123!)
 - **Editor**: editor@newspaper.com (Editor123!)
 - **Author**: author@newspaper.com (Author123!)

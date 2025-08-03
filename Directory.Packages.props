@@ -4,7 +4,7 @@
   </PropertyGroup>
   <ItemGroup>
     <!-- Maggsoft Framework Paketleri -->
-    <PackageVersion Include="Maggsoft.Core" Version="2.0.39" />
+    <PackageVersion Include="Maggsoft.Core" Version="2.1.1" />
     <PackageVersion Include="Maggsoft.Data" Version="2.0.20" />
     <PackageVersion Include="Maggsoft.Framework" Version="2.3.6" />
     <PackageVersion Include="Maggsoft.Data.Mssql" Version="2.0.10" />

@@ -10,235 +10,246 @@
     <link rel="stylesheet" href="~/css/admin.css" asp-append-version="true" />
 </head>
 <body>
-    <div class="admin-layout">
-        <!-- Sidebar -->
-        <nav class="sidebar">
-            <div class="sidebar-header">
-                <a href="/" class="sidebar-brand">
-                    <i class="fas fa-newspaper"></i>
-                    <span>NewsPanel</span>
-                </a>
-            </div>
-            
-            <div class="sidebar-nav">
-                <!-- Ana Yönetim -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Ana Yönetim</div>
-                    
-                    <div class="nav-item">
-                        <a href="/Dashboard" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")">
-                            <i class="fas fa-tachometer-alt"></i>
-                            <span>Dashboard</span>
-                        </a>
-                    </div>
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Moderator"))
-                    {
-                        <div class="nav-item">
-                            <a href="/Users" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")">
-                                <i class="fas fa-users"></i>
-                                <span>Kullanıcılar</span>
-                                <span class="nav-badge">24</span>
-                            </a>
-                        </div>
-                    }
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
-                    {
-                        <div class="nav-item">
-                            <a href="/Roles" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Roles" ? "active" : "")">
-                                <i class="fas fa-user-shield"></i>
-                                <span>Roller & Yetkiler</span>
-                            </a>
-                        </div>
-                    }
+    @if (User.Identity?.IsAuthenticated == true)
+    {
+        <div class="admin-layout">
+            <!-- Sidebar -->
+            <nav class="sidebar">
+                <div class="sidebar-header">
+                    <a href="/" class="sidebar-brand">
+                        <i class="fas fa-newspaper"></i>
+                        <span>NewsPanel</span>
+                    </a>
                 </div>
                 
-                <!-- İçerik Yönetimi -->
-                <div class="nav-section">
-                    <div class="nav-section-title">İçerik Yönetimi</div>
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor"))
-                    {
+                <div class="sidebar-nav">
+                    <!-- Ana Yönetim -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">Ana Yönetim</div>
+                        
                         <div class="nav-item">
-                            <a href="/Categories" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Categories" ? "active" : "")">
-                                <i class="fas fa-folder"></i>
-                                <span>Kategoriler</span>
+                            <a href="/Dashboard" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Dashboard" ? "active" : "")">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
                             </a>
                         </div>
-                    }
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("Author"))
-                    {
-                        <div class="nav-item">
-                            <a href="/Articles" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Articles" ? "active" : "")">
-                                <i class="fas fa-newspaper"></i>
-                                <span>Makaleler</span>
-                                <span class="nav-badge">156</span>
-                            </a>
-                        </div>
-                    }
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor"))
-                    {
-                        <div class="nav-item">
-                            <a href="/Tags" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Tags" ? "active" : "")">
-                                <i class="fas fa-tags"></i>
-                                <span>Etiketler</span>
-                            </a>
-                        </div>
-                    }
-                </div>
-                
-                <!-- Etkileşim -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Etkileşim</div>
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("Author") || User.IsInRole("Moderator"))
-                    {
-                        <div class="nav-item">
-                            <a href="/Comments" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Comments" ? "active" : "")">
-                                <i class="fas fa-comments"></i>
-                                <span>Yorumlar</span>
-                                <span class="nav-badge">89</span>
-                            </a>
-                        </div>
-                    }
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("Author") || User.IsInRole("Moderator"))
-                    {
-                        <div class="nav-item">
-                            <a href="/Reports" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reports" ? "active" : "")">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Raporlar</span>
-                            </a>
-                        </div>
-                    }
-                </div>
-                
-                <!-- Sistem -->
-                <div class="nav-section">
-                    <div class="nav-section-title">Sistem</div>
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
-                    {
-                        <div class="nav-item">
-                            <a href="/Settings" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Settings" ? "active" : "")">
-                                <i class="fas fa-cog"></i>
-                                <span>Ayarlar</span>
-                            </a>
-                        </div>
-                    }
-                    
-                    @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
-                    {
-                        <div class="nav-item">
-                            <a href="/Logs" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Logs" ? "active" : "")">
-                                <i class="fas fa-list-alt"></i>
-                                <span>Sistem Logları</span>
-                            </a>
-                        </div>
-                    }
-                </div>
-            </div>
-        </nav>
-
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- Header -->
-            <div class="header">
-                <div class="d-flex align-items-center">
-                    <h1 class="page-title">
-                        <i class="fas fa-@(ViewContext.RouteData.Values["Controller"]?.ToString()?.ToLower() switch {
-                            "dashboard" => "tachometer-alt",
-                            "users" => "users",
-                            "roles" => "user-shield",
-                            "categories" => "folder",
-                            "articles" => "newspaper",
-                            "tags" => "tags",
-                            "comments" => "comments",
-                            "reports" => "chart-bar",
-                            "settings" => "cog",
-                            "logs" => "list-alt",
-                            _ => "home"
-                        })"></i>
-                        @ViewData["Title"]
-                    </h1>
-                    
-                    <nav aria-label="breadcrumb" class="ms-4">
-                        <ol class="breadcrumb">
-                            <li class="breadcrumb-item"><a href="/Dashboard">Ana Sayfa</a></li>
-                            <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
-                        </ol>
-                    </nav>
-                </div>
-                
-                <div class="user-menu">
-                    <div class="dropdown">
-                        <button class="btn btn-link dropdown-toggle text-decoration-none d-flex align-items-center gap-3" type="button" data-bs-toggle="dropdown">
-                            <div class="user-info">
-                                <p class="user-name">Admin User</p>
-                                <p class="user-role">Super Admin</p>
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Moderator"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Users" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Users" ? "active" : "")">
+                                    <i class="fas fa-users"></i>
+                                    <span>Kullanıcılar</span>
+                                    <span class="nav-badge">24</span>
+                                </a>
                             </div>
-                            <div class="user-avatar">
-                                <i class="fas fa-user"></i>
+                        }
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Roles" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Roles" ? "active" : "")">
+                                    <i class="fas fa-user-shield"></i>
+                                    <span>Roller & Yetkiler</span>
+                                </a>
                             </div>
-                        </button>
-                        <ul class="dropdown-menu dropdown-menu-end">
-                            <li><a class="dropdown-item" href="/Users/Profile"><i class="fas fa-user me-2"></i>Profil</a></li>
-                            <li><a class="dropdown-item" href="/Users/Settings"><i class="fas fa-cog me-2"></i>Ayarlar</a></li>
-                            <li><hr class="dropdown-divider"></li>
-                            <li><a class="dropdown-item" href="/Users/Logout"><i class="fas fa-sign-out-alt me-2"></i>Çıkış</a></li>
-                        </ul>
+                        }
+                    </div>
+                    
+                    <!-- İçerik Yönetimi -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">İçerik Yönetimi</div>
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Categories" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Categories" ? "active" : "")">
+                                    <i class="fas fa-folder"></i>
+                                    <span>Kategoriler</span>
+                                </a>
+                            </div>
+                        }
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("Author"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Articles" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Articles" ? "active" : "")">
+                                    <i class="fas fa-newspaper"></i>
+                                    <span>Makaleler</span>
+                                    <span class="nav-badge">156</span>
+                                </a>
+                            </div>
+                        }
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Tags" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Tags" ? "active" : "")">
+                                    <i class="fas fa-tags"></i>
+                                    <span>Etiketler</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                    
+                    <!-- Etkileşim -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">Etkileşim</div>
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("Author") || User.IsInRole("Moderator"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Comments" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Comments" ? "active" : "")">
+                                    <i class="fas fa-comments"></i>
+                                    <span>Yorumlar</span>
+                                    <span class="nav-badge">89</span>
+                                </a>
+                            </div>
+                        }
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin") || User.IsInRole("Editor") || User.IsInRole("Author") || User.IsInRole("Moderator"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Reports" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Reports" ? "active" : "")">
+                                    <i class="fas fa-chart-bar"></i>
+                                    <span>Raporlar</span>
+                                </a>
+                            </div>
+                        }
+                    </div>
+                    
+                    <!-- Sistem -->
+                    <div class="nav-section">
+                        <div class="nav-section-title">Sistem</div>
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Settings" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Settings" ? "active" : "")">
+                                    <i class="fas fa-cog"></i>
+                                    <span>Ayarlar</span>
+                                </a>
+                            </div>
+                        }
+                        
+                        @if (User.IsInRole("SuperAdmin") || User.IsInRole("Admin"))
+                        {
+                            <div class="nav-item">
+                                <a href="/Logs" class="nav-link @(ViewContext.RouteData.Values["Controller"]?.ToString() == "Logs" ? "active" : "")">
+                                    <i class="fas fa-list-alt"></i>
+                                    <span>Sistem Logları</span>
+                                </a>
+                            </div>
+                        }
                     </div>
                 </div>
-            </div>
+            </nav>
 
-            <!-- Content -->
-            <div class="content">
-                <!-- Alerts -->
-                @if (TempData["Success"] != null)
-                {
-                    <div class="alert alert-success alert-dismissible fade show" role="alert">
-                        <i class="fas fa-check-circle"></i>
-                        @TempData["Success"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            <!-- Main Content -->
+            <div class="main-content">
+                <!-- Header -->
+                <div class="header">
+                    <div class="d-flex align-items-center">
+                        <h1 class="page-title">
+                            <i class="fas fa-@(ViewContext.RouteData.Values["Controller"]?.ToString()?.ToLower() switch {
+                                "dashboard" => "tachometer-alt",
+                                "users" => "users",
+                                "roles" => "user-shield",
+                                "categories" => "folder",
+                                "articles" => "newspaper",
+                                "tags" => "tags",
+                                "comments" => "comments",
+                                "reports" => "chart-bar",
+                                "settings" => "cog",
+                                "logs" => "list-alt",
+                                _ => "home"
+                            })"></i>
+                            @ViewData["Title"]
+                        </h1>
+                        
+                        <nav aria-label="breadcrumb" class="ms-4">
+                            <ol class="breadcrumb">
+                                <li class="breadcrumb-item"><a href="/Dashboard">Ana Sayfa</a></li>
+                                <li class="breadcrumb-item active" aria-current="page">@ViewData["Title"]</li>
+                            </ol>
+                        </nav>
                     </div>
-                }
-                
-                @if (TempData["Error"] != null)
-                {
-                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        @TempData["Error"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                    
+                    <div class="user-menu">
+                        <div class="dropdown">
+                            <button class="btn btn-link dropdown-toggle text-decoration-none d-flex align-items-center gap-3" type="button" data-bs-toggle="dropdown">
+                                <div class="user-info">
+                                    <p class="user-name">@User.Identity.Name</p>
+                                    <p class="user-role">@(User.IsInRole("SuperAdmin") ? "Super Admin" : User.IsInRole("Admin") ? "Admin" : User.IsInRole("Editor") ? "Editor" : User.IsInRole("Author") ? "Author" : User.IsInRole("Moderator") ? "Moderator" : "User")</p>
+                                </div>
+                                <div class="user-avatar">
+                                    <i class="fas fa-user"></i>
+                                </div>
+                            </button>
+                            <ul class="dropdown-menu dropdown-menu-end">
+                                <li><a class="dropdown-item" href="/Users/Profile"><i class="fas fa-user me-2"></i>Profil</a></li>
+                                <li><a class="dropdown-item" href="/Users/Settings"><i class="fas fa-cog me-2"></i>Ayarlar</a></li>
+                                <li><hr class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="/Users/Logout"><i class="fas fa-sign-out-alt me-2"></i>Çıkış</a></li>
+                            </ul>
+                        </div>
                     </div>
-                }
-                
-                @if (TempData["Warning"] != null)
-                {
-                    <div class="alert alert-warning alert-dismissible fade show" role="alert">
-                        <i class="fas fa-exclamation-circle"></i>
-                        @TempData["Warning"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-                
-                @if (TempData["Info"] != null)
-                {
-                    <div class="alert alert-info alert-dismissible fade show" role="alert">
-                        <i class="fas fa-info-circle"></i>
-                        @TempData["Info"]
-                        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
-                    </div>
-                }
-                
-                @RenderBody()
+                </div>
+
+                <!-- Content -->
+                <div class="content">
+                    <!-- Alerts -->
+                    @if (TempData["Success"] != null)
+                    {
+                        <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <i class="fas fa-check-circle me-2"></i>
+                            @TempData["Success"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Error"] != null)
+                    {
+                        <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            @TempData["Error"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Warning"] != null)
+                    {
+                        <div class="alert alert-warning alert-dismissible fade show" role="alert">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            @TempData["Warning"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @if (TempData["Info"] != null)
+                    {
+                        <div class="alert alert-info alert-dismissible fade show" role="alert">
+                            <i class="fas fa-info-circle me-2"></i>
+                            @TempData["Info"]
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    }
+
+                    @RenderBody()
+                </div>
             </div>
         </div>
-    </div>
+    }
+    else
+    {
+        <!-- Login olmamış kullanıcılar için sadece content göster -->
+        <div class="container-fluid">
+            @RenderBody()
+        </div>
+    }
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
     @await RenderSectionAsync("Scripts", required: false)
 </body>
 </html>

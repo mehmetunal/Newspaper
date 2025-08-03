@@ -5,6 +5,9 @@ using Newspaper.AdminPanel.Models;
 using Newspaper.Dto.Mssql;
 using Maggsoft.Framework.HttpClientApi;
 using Newspaper.Dto.Mssql.Common;
+using System.Security.Claims;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 
 namespace Newspaper.AdminPanel.Controllers
 {
@@ -212,19 +215,16 @@ namespace Newspaper.AdminPanel.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [AllowAnonymous]
         public IActionResult Login()
         {
-            if (User.Identity?.IsAuthenticated == true)
-            {
-                return RedirectToAction("Index", "Dashboard");
-            }
-
             ViewData["Title"] = "Giriş Yap";
             return View(new LoginViewModel());
         }
 
         [HttpPost]
         [ValidateAntiForgeryToken]
+        [AllowAnonymous]
         public async Task<IActionResult> Login(LoginViewModel model)
         {
             if (ModelState.IsValid)
@@ -237,11 +237,31 @@ namespace Newspaper.AdminPanel.Controllers
                         Password = model.Password
                     };
 
-                    var response = await _httpClient.PostAsync<Result<LoginResponseDto>>("api/user/login", loginDto);
+                    var response = await _httpClient.PostAsync<LoginResponseDto>("api/auth/login", loginDto);
                     if (response.IsSuccess)
                     {
-                        // TODO: Implement cookie authentication
-                        TempData["Success"] = "Başarıyla giriş yaptınız.";
+                        // Cookie authentication yapılıyor
+                        var claims = new List<Claim>
+                        {
+                            new Claim(ClaimTypes.Name, response.Data.Email),
+                            new Claim(ClaimTypes.Email, response.Data.Email),
+                            new Claim(ClaimTypes.NameIdentifier, response.Data.UserId.ToString()),
+                            new Claim(ClaimTypes.Role, response.Data.RoleName)
+                        };
+
+                        var claimsIdentity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+                        var authProperties = new AuthenticationProperties
+                        {
+                            IsPersistent = true,
+                            ExpiresUtc = DateTimeOffset.UtcNow.AddDays(1)
+                        };
+
+                        await HttpContext.SignInAsync(
+                            CookieAuthenticationDefaults.AuthenticationScheme,
+                            new ClaimsPrincipal(claimsIdentity),
+                            authProperties);
+
+                        TempData["Success"] = "Giriş başarılı!";
                         return RedirectToAction("Index", "Dashboard");
                     }
 
@@ -257,9 +277,12 @@ namespace Newspaper.AdminPanel.Controllers
             return View(model);
         }
 
-        public IActionResult Logout()
+        [AllowAnonymous]
+        public async Task<IActionResult> Logout()
         {
-            // TODO: Implement logout
+            // Cookie authentication temizleniyor
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            TempData["Success"] = "Çıkış yapıldı.";
             return RedirectToAction("Login");
         }
     }

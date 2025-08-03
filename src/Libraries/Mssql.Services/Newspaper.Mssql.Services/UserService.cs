@@ -1,11 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Logging;
+using Microsoft.EntityFrameworkCore;
 using Newspaper.Data.Mssql;
 using Newspaper.Dto.Mssql;
 using Maggsoft.Core.Model.Pagination;
 using Maggsoft.Core.Model;
 using Maggsoft.Core.Extensions;
 using Newspaper.Dto.Mssql.Role;
+using Newspaper.Mssql;
 
 namespace Newspaper.Mssql.Services
 {
@@ -16,25 +18,28 @@ namespace Newspaper.Mssql.Services
     {
         private readonly UserManager<User> _userManager;
         private readonly RoleManager<Role> _roleManager;
+        private readonly NewspaperDbContext _context;
         private readonly ILogger<UserService> _logger;
 
         public UserService(
             UserManager<User> userManager,
             RoleManager<Role> roleManager,
+            NewspaperDbContext context,
             ILogger<UserService> logger)
         {
             _userManager = userManager;
             _roleManager = roleManager;
+            _context = context;
             _logger = logger;
         }
 
         /// <summary>
-        /// Kullanıcı listesini getirir
+        /// Kullanıcıları sayfalı olarak getirir
         /// </summary>
         /// <param name="page">Sayfa numarası</param>
         /// <param name="pageSize">Sayfa boyutu</param>
         /// <param name="searchTerm">Arama terimi</param>
-        /// <returns>Sayfalanmış kullanıcı listesi</returns>
+        /// <returns>Kullanıcı listesi</returns>
         public async Task<PagedList<UserListDto>> GetUsersAsync(int page = 1, int pageSize = 10, string? searchTerm = null)
         {
             try
@@ -42,11 +47,11 @@ namespace Newspaper.Mssql.Services
                 var query = _userManager.Users.AsQueryable();
 
                 // Arama filtresi
-                if (!string.IsNullOrEmpty(searchTerm))
+                if (!string.IsNullOrWhiteSpace(searchTerm))
                 {
                     query = query.Where(u =>
-                        u.FirstName.Contains(searchTerm) ||
-                        u.LastName.Contains(searchTerm) ||
+                        u.FirstName!.Contains(searchTerm) ||
+                        u.LastName!.Contains(searchTerm) ||
                         u.Email!.Contains(searchTerm) ||
                         u.UserName!.Contains(searchTerm));
                 }
@@ -59,15 +64,41 @@ namespace Newspaper.Mssql.Services
                     LastName = u.LastName,
                     Email = u.Email!,
                     FullName = $"{u.FirstName} {u.LastName}",
-                    RoleName = "", // @TODO:  UserManager ile role bilgisi ayrıca alınmalı
+                    RoleName = "", // Role bilgisi ayrıca alınacak
                     ProfileImageUrl = u.ProfileImageUrl,
                     LastLoginDate = u.LastLoginDate,
-                    ArticleCount = 0, // @TODO:  Ayrıca hesaplanmalı
-                    CommentCount = 0 // @TODO:  Ayrıca hesaplanmalı
+                    ArticleCount = 0, // Article sayısı ayrıca hesaplanacak
+                    CommentCount = 0, // Comment sayısı ayrıca hesaplanacak
+                    UserName = u.UserName!,
+                    PhoneNumber = u.PhoneNumber!,
+                    CreatedAt = DateTime.UtcNow, // User entity'sinde CreatedAt yok, default değer
+                    IsActive = u.IsActive
                 });
 
-                // PagedList kullan
-                return await userQuery.ToPagedListAsync(page - 1, pageSize, new List<Filter>());
+                var users = await userQuery.ToPagedListAsync(page - 1, pageSize, new List<Filter>());
+
+                // Role bilgilerini ve sayıları ayrıca hesapla
+                foreach (var user in users.Data)
+                {
+                    var userEntity = await _userManager.FindByIdAsync(user.Id.ToString());
+                    if (userEntity != null)
+                    {
+                        var roles = await _userManager.GetRolesAsync(userEntity);
+                        user.RoleName = roles.FirstOrDefault() ?? "";
+
+                        // Article sayısını hesapla
+                        user.ArticleCount = await _context.Articles
+                            .Where(a => a.AuthorId == user.Id && !a.IsDeleted)
+                            .CountAsync();
+
+                        // Comment sayısını hesapla
+                        user.CommentCount = await _context.Comments
+                            .Where(c => c.UserId == user.Id && !c.IsDeleted)
+                            .CountAsync();
+                    }
+                }
+
+                return users;
             }
             catch (Exception ex)
             {
@@ -91,6 +122,15 @@ namespace Newspaper.Mssql.Services
 
                 var roles = await _userManager.GetRolesAsync(user);
 
+                // Article ve Comment sayılarını hesapla
+                var articleCount = await _context.Articles
+                    .Where(a => a.AuthorId == id && !a.IsDeleted)
+                    .CountAsync();
+
+                var commentCount = await _context.Comments
+                    .Where(c => c.UserId == id && !c.IsDeleted)
+                    .CountAsync();
+
                 return new UserDetailDto
                 {
                     Id = user.Id,
@@ -105,9 +145,11 @@ namespace Newspaper.Mssql.Services
                     BirthDate = user.BirthDate,
                     Gender = user.Gender,
                     LastLoginDate = user.LastLoginDate,
-                    ArticleCount = 0, // @TODO: Ayrıca hesaplanmalı
-                    CommentCount = 0, // @TODO: Ayrıca hesaplanmalı
-                    Roles = roles.ToList()
+                    ArticleCount = articleCount,
+                    CommentCount = commentCount,
+                    Roles = roles.ToList(),
+                    PhoneNumber = user.PhoneNumber!,
+                    IsActive = user.IsActive,
                 };
             }
             catch (Exception ex)
@@ -259,7 +301,7 @@ namespace Newspaper.Mssql.Services
         {
             try
             {
-                //  @TODO:  IdentityUser soft delete desteklemiyor, bu method her zaman false döner
+                // IdentityUser soft delete desteklemiyor, bu method kullanılamaz
                 _logger.LogWarning("IdentityUser soft delete desteklemiyor. RestoreUserAsync method'u kullanılamaz.");
                 return false;
             }

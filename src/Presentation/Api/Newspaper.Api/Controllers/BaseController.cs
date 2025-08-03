@@ -2,6 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using Maggsoft.Core.Base;
 using System.Security.Claims;
+using Maggsoft.Core.Model;
 
 namespace Newspaper.Api.Controllers
 {
@@ -64,7 +65,8 @@ namespace Newspaper.Api.Controllers
         /// <returns>Başarılı yanıt</returns>
         protected ActionResult<Result<T>> Success<T>(T data, string message = "İşlem başarılı") where T : class
         {
-            return Ok(Result<T>.Success(data, new Maggsoft.Core.Model.SuccessMessage("200",message)));
+            return Ok(Result<T>.Success(data, new Maggsoft.
+                Core.Model.SuccessMessage("200",message)));
         }
 
         /// <summary>
@@ -75,9 +77,9 @@ namespace Newspaper.Api.Controllers
         /// <returns>Hata yanıtı</returns>
         protected ActionResult<Result<T>> Error<T>(string message, int statusCode = 400) where T : class
         {
-            return StatusCode(statusCode, Result<T>.Failure(new Maggsoft.Core.Model.Error(statusCode.ToString(),message)));
+            return BadRequest(Result<T>.Failure(new Error(statusCode.ToString(),message)));
         }
     }
 
 
-} 
+}
