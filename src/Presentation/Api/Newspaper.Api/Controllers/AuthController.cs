@@ -49,9 +49,12 @@ namespace Newspaper.Api.Controllers
                 // Kullanıcı bilgilerini al
                 var roles = await userManager.GetRolesAsync(user);
 
+                // Bearer Token oluştur
+                var token = await userManager.GenerateUserTokenAsync(user, "Default", "BearerToken");
+
                 var response = new LoginResponseDto
                 {
-                    Token = "JWT_TOKEN_HERE", // TODO: JWT token oluşturulacak
+                    Token = token,
                     UserId = user.Id,
                     Email = user.Email!,
                     UserName = user.UserName!,

@@ -63,6 +63,20 @@ namespace Newspaper.IdentityManager
                 {
                     identity.AddClaim(new Claim("LastLoginDate", user.LastLoginDate.Value.ToString("yyyy-MM-dd HH:mm:ss")));
                 }
+
+                // Kullanıcının rollerini al ve claims'e ekle
+                var roles = await UserManager.GetRolesAsync(user);
+                foreach (var role in roles)
+                {
+                    identity.AddClaim(new Claim(ClaimTypes.Role, role));
+                    identity.AddClaim(new Claim("Role", role));
+                }
+
+                // Ana rolü (ilk rolü) ayrıca ekle
+                if (roles.Any())
+                {
+                    identity.AddClaim(new Claim("PrimaryRole", roles.First()));
+                }
             }
 
             return principal;

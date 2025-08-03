@@ -75,13 +75,16 @@ builder.Services.AddIdentity<User, Role>(options =>
     options.Password.RequiredLength = 6;
 })
 .AddEntityFrameworkStores<NewspaperDbContext>()
+.AddClaimsPrincipalFactory<CustomClaimsPrincipalFactory>()
+.AddErrorDescriber<CustomIdentityErrorDescriber>()
 .AddDefaultTokenProviders()
 .AddRoleManager<RoleManager<Role>>();
 
-// Custom Identity sınıfları
-builder.Services.AddScoped<AuditableSignInManager>();
-builder.Services.AddScoped<CustomClaimsPrincipalFactory>();
-builder.Services.AddScoped<UserConfirmation>();
+// Token süresi konfigürasyonu - 1 gün
+builder.Services.Configure<DataProtectionTokenProviderOptions>(options =>
+{
+    options.TokenLifespan = TimeSpan.FromDays(1);
+});
 
 // Database servisleri
 builder.Services.AddScoped<IMigrationService, MigrationService>();
@@ -103,6 +106,7 @@ builder.Services.AddSingleton<IFileProvider>(
 
 builder.Services.AddTransient<IFilesManager, FilesManager>();
 builder.Services.AddTransient<IMaggsoftFileProvider, MaggsoftFileProvider>();
+
 builder.Services.AddHttpContextAccessor();
 
 // Maggsoft Framework Middleware'leri
@@ -121,7 +125,6 @@ builder.Services.AddCors(options =>
 });
 
 // FluentValidation konfigürasyonu
-
 builder.Services.AddValidatorsFromAssembly(Assembly.GetExecutingAssembly());
 
 // Memory Cache
